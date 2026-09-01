@@ -1,0 +1,286 @@
+{
+  "project": {
+    "name": "Uber Architecture",
+    "description": "High-level overview of Uber's Microservice Architecture",
+    "theme": "dark_neon"
+  },
+  "groups": [
+    {
+      "id": "edge",
+      "label": "CLIENT & EDGE",
+      "x": 50,
+      "y": 150,
+      "width": 250,
+      "height": 260,
+      "nodes": [
+        {
+          "id": "rider_app",
+          "label": "Rider App",
+          "kind": "entry",
+          "x": 20,
+          "y": 40,
+          "logo": "https://cdn.simpleicons.org/uber/ffffff"
+        },
+        {
+          "id": "driver_app",
+          "label": "Driver App",
+          "kind": "entry",
+          "x": 20,
+          "y": 100,
+          "logo": "https://cdn.simpleicons.org/uber/ffffff"
+        },
+        {
+          "id": "api_gw",
+          "label": "API Gateway (HAProxy)",
+          "kind": "service",
+          "x": 20,
+          "y": 180,
+          "logo": "https://cdn.simpleicons.org/haproxy/ffffff"
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "label": "CORE BACKEND (DISCO)",
+      "x": 400,
+      "y": 100,
+      "width": 380,
+      "height": 380,
+      "nodes": [
+        {
+          "id": "demand",
+          "label": "Demand Service",
+          "kind": "agent",
+          "x": 40,
+          "y": 40,
+          "logo": "https://cdn.simpleicons.org/go/ffffff"
+        },
+        {
+          "id": "supply",
+          "label": "Supply Service",
+          "kind": "agent",
+          "x": 200,
+          "y": 40,
+          "logo": "https://cdn.simpleicons.org/go/ffffff"
+        },
+        {
+          "id": "dispatch",
+          "label": "Dispatch Optimizer",
+          "kind": "model",
+          "x": 100,
+          "y": 120,
+          "logo": "https://cdn.simpleicons.org/tensorflow/ffffff"
+        },
+        {
+          "id": "trip",
+          "label": "Trip Execution",
+          "kind": "service",
+          "x": 100,
+          "y": 200,
+          "logo": "https://cdn.simpleicons.org/nodedotjs/ffffff"
+        },
+        {
+          "id": "maps",
+          "label": "Maps & ETA",
+          "kind": "external",
+          "x": 40,
+          "y": 280,
+          "logo": "https://cdn.simpleicons.org/googlemaps/ffffff"
+        },
+        {
+          "id": "payment",
+          "label": "Payment Service",
+          "kind": "tool",
+          "x": 200,
+          "y": 280,
+          "logo": "https://cdn.simpleicons.org/stripe/ffffff"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "DATA & MESSAGING",
+      "x": 880,
+      "y": 120,
+      "width": 280,
+      "height": 320,
+      "nodes": [
+        {
+          "id": "kafka",
+          "label": "Kafka Event Bus",
+          "kind": "cron",
+          "x": 40,
+          "y": 40,
+          "logo": "https://cdn.simpleicons.org/apachekafka/ffffff"
+        },
+        {
+          "id": "redis",
+          "label": "Redis Cache",
+          "kind": "store",
+          "x": 40,
+          "y": 120,
+          "logo": "https://cdn.simpleicons.org/redis/ffffff"
+        },
+        {
+          "id": "cassandra",
+          "label": "Cassandra DB",
+          "kind": "store",
+          "x": 40,
+          "y": 200,
+          "logo": "https://cdn.simpleicons.org/apachecassandra/ffffff"
+        },
+        {
+          "id": "hadoop",
+          "label": "Hadoop Analytics",
+          "kind": "store",
+          "x": 40,
+          "y": 270,
+          "logo": "https://cdn.simpleicons.org/apachehadoop/ffffff"
+        }
+      ]
+    }
+  ],
+  "standalone": [],
+  "edges": [
+    {
+      "source": "rider_app",
+      "target": "api_gw",
+      "label": "HTTPS",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "driver_app",
+      "target": "api_gw",
+      "label": "WebSocket",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "api_gw",
+      "target": "demand",
+      "label": "Req Ride",
+      "sourcePort": "right",
+      "targetPort": "left"
+    },
+    {
+      "source": "api_gw",
+      "target": "supply",
+      "label": "Ping Loc",
+      "sourcePort": "right",
+      "targetPort": "left"
+    },
+    {
+      "source": "demand",
+      "target": "dispatch",
+      "label": "Matching",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "supply",
+      "target": "dispatch",
+      "label": "Available",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "dispatch",
+      "target": "trip",
+      "label": "Start Trip",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "trip",
+      "target": "maps",
+      "label": "Get ETA",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "trip",
+      "target": "payment",
+      "label": "Charge",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    },
+    {
+      "source": "trip",
+      "target": "kafka",
+      "label": "Events",
+      "sourcePort": "right",
+      "targetPort": "left"
+    },
+    {
+      "source": "dispatch",
+      "target": "redis",
+      "label": "Geo-index",
+      "sourcePort": "right",
+      "targetPort": "left"
+    },
+    {
+      "source": "trip",
+      "target": "cassandra",
+      "label": "Trip Data",
+      "sourcePort": "right",
+      "targetPort": "left"
+    },
+    {
+      "source": "kafka",
+      "target": "hadoop",
+      "label": "ETL",
+      "sourcePort": "bottom",
+      "targetPort": "top"
+    }
+  ],
+  "steps": [
+    {
+      "title": "Rider Requests",
+      "description": "The Rider requests a ride through the API Gateway, reaching the Demand Service.",
+      "highlight": [
+        "rider_app",
+        "api_gw",
+        "demand"
+      ]
+    },
+    {
+      "title": "Driver Updates",
+      "description": "Drivers constantly stream their GPS locations via WebSockets to the Supply Service.",
+      "highlight": [
+        "driver_app",
+        "api_gw",
+        "supply",
+        "redis"
+      ]
+    },
+    {
+      "title": "Dispatch Matching",
+      "description": "The Dispatch Optimizer matches demand and supply using geospatial data.",
+      "highlight": [
+        "demand",
+        "supply",
+        "dispatch",
+        "redis"
+      ]
+    },
+    {
+      "title": "Trip Execution",
+      "description": "Once matched, the Trip Service handles the lifecycle, mapping routes, and collecting payment.",
+      "highlight": [
+        "trip",
+        "maps",
+        "payment"
+      ]
+    },
+    {
+      "title": "Analytics Logging",
+      "description": "All trip events stream through Kafka into Hadoop for machine learning and pricing optimization.",
+      "highlight": [
+        "trip",
+        "kafka",
+        "hadoop"
+      ]
+    }
+  ]
+}

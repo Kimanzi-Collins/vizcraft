@@ -1,0 +1,124 @@
+{
+  "project": {
+    "name": "Stripe-Managed SaaS Uber — MVP Build",
+    "description": "Ride-sharing platform with Stripe Connect, real-time tracking, and multi-region support",
+    "theme": "dark_neon"
+  },
+  "phases": [
+    {
+      "id": "phase-1-infrastructure",
+      "title": "Phase 1: Core Infrastructure & Multi-Region Data Architecture",
+      "description": "Establish highly available relational storage with PostGIS extensions, distributed Redis caching, and centralized secret management for the platform.",
+      "tip": "Prioritize database schema normalization and spatial indexing from day one to avoid costly table migrations when scaling geospatial queries across high-density urban areas. Implement connection pooling using PgBouncer early to prevent ephemeral port exhaustion under heavy concurrent connection spikes. Ensure Redis persistence is configured with both RDB snapshots and AOF (append-only file) with appendfsync everysec to guard against data loss during unexpected broker restarts.",
+      "tasks": [
+        {
+          "id": "postgres-schema",
+          "title": "PostgreSQL Schema & PostGIS Spatial Extensions",
+          "note": "Design the core relational data model in PostgreSQL 16 leveraging PostGIS spatial extensions for fast geographic distance computations and bounding box queries. Key tables must include 'users' (id, role, phone_e164, email, status, created_at), 'driver_profiles' (user_id, license_number, vehicle_type, rating, stripe_account_id, is_active, is_verified), 'trips' (id, rider_id, driver_id, status, pickup_location GEOMETRY(Point, 4326), dropoff_location GEOMETRY(Point, 4326), fare_cents, surge_multiplier, route_polyline, initiated_at, completed_at), and 'ledger_entries' for double-entry accounting. Create spatial GiST indexes on pickup_location and dropoff_location columns to accelerate ST_DWithin and ST_DistanceSphere queries. Implement strict UUIDv7 primary keys for time-ordered clustering, foreign key constraints with ON DELETE RESTRICT on financial records, and table partitioning by month on the trips table to preserve query latency as transaction volumes scale."
+        },
+        {
+          "id": "redis-setup",
+          "title": "Redis Cluster & Geospatial Cache Layer",
+          "note": "Deploy a low-latency Redis 7.2 cluster configured for geospatial driver tracking, ephemeral session caching, and rate limiting. Utilize Redis GEO commands (GEOADD, GEORADIUS, and GEOSEARCH) to maintain live driver coordinate sets partitioned by geographic geohash or city-level cluster keys. Set up memory eviction policies using volatile-lru with dedicated database instances to separate volatile session tokens from critical driver presence indexes. Implement connection pooling via redis-py or ioredis with automated reconnection backoff, exponential jitter, and health-check ping intervals. Configure Redis Pub/Sub channels for broadcasting ride status state transitions and driver proximity dispatch pings to connected gateway workers."
+        },
+        {
+          "id": "environment-config",
+          "title": "Centralized Environment Configuration & Secret Management",
+          "note": "Establish an environment isolation pipeline supporting local, staging, and production tiers with zero hardcoded credentials. Implement strict schema validation using Pydantic Settings or Dotenv-vault to enforce presence and type correctness for all runtime secrets including TWILIO_AUTH_TOKEN, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, DATABASE_URL, and REDIS_URL. Integrate AWS Secrets Manager or HashiCorp Vault for dynamic secret rotation and audit logging of cryptographic keys. Configure Docker Compose orchestration files with health checks for PostgreSQL and Redis to standardize developer onboarding and local testing environments. Ensure production builds enforce TLS 1.3 encryption across all database and caching connection strings with automated SSL certificate validation."
+        }
+      ]
+    },
+    {
+      "id": "phase-2-auth-onboarding",
+      "title": "Phase 2: Authentication, Authorization & Driver Onboarding",
+      "description": "Build secure passwordless phone authentication with Twilio OTP, stateless JWT session middleware, and automated driver KYC document verification pipelines.",
+      "tip": "Enforce strict rate limiting per phone number and IP on all OTP initiation endpoints to mitigate SMS toll fraud and bot exhaustion attacks. Isolate rider and driver role claims within cryptographically signed JWT payloads to prevent privilege escalation at the API gateway layer. Use presigned S3/GCS upload URLs with expiring signatures for driver identity documents so sensitive PII never traverses application server memory unencrypted.",
+      "tasks": [
+        {
+          "id": "otp-twilio",
+          "title": "Passwordless Phone Authentication with Twilio Verify",
+          "note": "Develop passwordless authentication endpoints POST /api/v1/auth/otp/send and POST /api/v1/auth/otp/verify using the Twilio Verify v2 REST API. Enforce E.164 phone number formatting via Google's libphonenumber library before dispatching 6-digit numeric verification codes. Implement a sliding window rate limiter in Redis allowing a maximum of 3 OTP requests per phone number every 10 minutes and 10 requests per IP address per hour to stop SMS pumping exploits. Handle edge cases such as invalid country codes, carrier lookup failures, expired tokens (10-minute TTL), and max-retry verification lockouts. On successful verification, upsert the user record in PostgreSQL and return an initial authentication payload containing user ID, role, and onboarding completion status."
+        },
+        {
+          "id": "jwt-middleware",
+          "title": "Stateless JWT Authentication & Role-Based Access Control",
+          "note": "Implement asymmetric RS256 or Ed25519 JWT token generation with dual-token architecture consisting of short-lived access tokens (15-minute expiration) and rotating refresh tokens (30-day expiration stored in HTTP-only, Secure, SameSite=Strict cookies). Build middleware guards to inspect Authorization Bearer headers, decode claims (sub, role, device_id, iss, exp), and inject verified user contexts into downstream handler scopes. Store cryptographic token revocation fingerprints in a Redis blacklist with TTL matching the remaining token lifetime for immediate session invalidation upon logout. Enforce granular Role-Based Access Control (RBAC) across rider, driver, and platform admin endpoints with dedicated permission decorators. Implement automated refresh flow via POST /api/v1/auth/refresh with token reuse detection to trigger instant family revocation if a compromised refresh token is replayed."
+        },
+        {
+          "id": "driver-document-verification",
+          "title": "Driver KYC & Document Upload Verification Pipeline",
+          "note": "Create the driver onboarding workflow with endpoints POST /api/v1/drivers/documents/presigned-url and POST /api/v1/drivers/documents/submit for driver license, vehicle registration, and commercial insurance uploads. Generate pre-signed S3 upload URLs with client-side SHA-256 checksum validation and a strict 5-minute expiry to keep uploads direct and secure. Store document metadata, expiration dates, OCR text extraction results, and verification statuses (PENDING, APPROVED, REJECTED, EXPIRED) in the 'driver_documents' table. Integrate asynchronous webhook triggers with automated KYC providers (e.g., Persona or Stripe Identity) to verify driver identity and driving history against government databases. Handle edge cases such as blurry image rejections, mismatched document names, and automated expiration warnings dispatched 30 days prior to driver license lapse."
+        }
+      ]
+    },
+    {
+      "id": "phase-3-ride-matching-engine",
+      "title": "Phase 3: High-Concurrency Ride Matching & Dynamic Pricing Engine",
+      "description": "Implement geospatial indexing for active drivers, atomic ride request queueing with lockouts and timeouts, and multi-variable dynamic fare calculation algorithms.",
+      "tip": "Use Redis distributed locks (Redlock or SETNX with UUID owner tokens) during driver assignment to guarantee that a single driver cannot be concurrently dispatched to multiple simultaneous trip requests. Calibrate geospatial search radius expansions in tiered batches (e.g., 1km, 3km, 5km) to balance dispatch latency against network roundtrips. Ensure the fare calculation engine calculates and locks upfront price guarantees with cryptographic nonces to prevent rider disputes caused by transient surge fluctuations.",
+      "tasks": [
+        {
+          "id": "redis-geospatial-driver-index",
+          "title": "Redis Geospatial Driver Presence Index & Heartbeat Engine",
+          "note": "Build high-frequency driver location ingestion endpoints via WebSocket and POST /api/v1/drivers/location executing Redis GEOADD operations on spatial keys ('drivers:available:<city_id>'). Maintain driver state machines (OFFLINE, AVAILABLE, EN_ROUTE_PICKUP, ON_TRIP) in Redis hashes with TTL-backed heartbeat keys that automatically mark drivers OFFLINE if no ping is received within 15 seconds. Implement spatial proximity queries using GEORADIUSBYMEMBER or GEOSEARCH with WITHDIST and WITHCOORD flags to return the top N nearest available drivers sorted by geodesic distance. Cluster spatial keys using H3 hexagonal hierarchical spatial indices or geohash prefixes to eliminate lock contention across distinct metropolitan dispatch zones. Handle edge cases such as rapid GPS drift, duplicate coordinate packets, and tunnel re-entry bursts using Kalman filter smoothing algorithms."
+        },
+        {
+          "id": "trip-request-queue",
+          "title": "Atomic Trip Request Dispatch Queue & Driver Accept Timeout",
+          "note": "Construct an asynchronous dispatch pipeline with POST /api/v1/trips/request which creates a TRIP_REQUESTED record and pushes the dispatch job to a BullMQ or Celery Redis queue. Implement an atomic driver-offering loop that reserves the nearest candidate driver using Redis SETNX with a 15-second expiration lease and pushes an interactive offer card to the driver's device. If the driver declines or the 15-second TTL expires without an ACCEPT response, release the lock, record the rejection in the dispatch audit log, and cascade the offer to the next closest driver in the spatial candidate list. Limit matching attempts to a maximum of 5 cascading driver iterations or a global 90-second timeout before updating the trip status to NO_DRIVERS_AVAILABLE and notifying the rider. Ensure transactional atomicity via PostgreSQL SELECT FOR UPDATE or Redis Lua scripts during the final trip confirmation transition to prevent race conditions."
+        },
+        {
+          "id": "fare-calculation",
+          "title": "Dynamic Upfront Pricing, Surge Multiplier & ETA Estimation Engine",
+          "note": "Develop the pricing calculation service at POST /api/v1/trips/estimate-fare utilizing OpenStreetMap/OSRM or Google Maps Distance Matrix APIs for accurate travel duration and route distance. Calculate base fares using the formula: Base Fare + (Estimated Minutes * Per-Minute Rate) + (Estimated Distance * Per-Mile Rate) + Airport/Toll Surcharges. Calculate dynamic surge multipliers in real-time by computing the ratio of active rider demand pings to available drivers within localized H3 hex cells over 5-minute rolling windows. Generate a signed fare token (HMAC-SHA256 containing trip parameters, estimated fare, surge tier, and timestamp) with a 5-minute validity window for the rider to accept. Handle edge cases such as sudden route recalculation, mid-trip destination changes, and minimum cancellation fee rules enforced when a rider cancels 2+ minutes after driver acceptance."
+        }
+      ]
+    },
+    {
+      "id": "phase-4-stripe-payments",
+      "title": "Phase 4: Stripe Connect Escrow, Payouts & Resilient Webhooks",
+      "description": "Architect multi-party marketplace payments using Stripe Connect Custom/Express accounts, two-step authorization holds and captures, and idempotent webhook handlers.",
+      "tip": "Always execute payment authorization holds at the moment of ride booking and only capture the final charge upon trip completion to account for tolls, tips, and route changes. Store all financial transactions in an immutable, append-only double-entry ledger table within PostgreSQL to simplify reconciliation against Stripe payout balances. Guard every incoming Stripe webhook against replay attacks by enforcing raw body cryptographic signature verification and database-backed idempotency event keys.",
+      "tasks": [
+        {
+          "id": "stripe-connect-express",
+          "title": "Stripe Connect Express Onboarding & Split Payment Configuration",
+          "note": "Integrate the Stripe Connect API to provision Express or Custom connected accounts for drivers via POST /api/v1/drivers/stripe/onboarding-link using the stripe.accountLinks.create SDK method. Store the resulting Stripe Account ID ('acct_xxx'), onboarding status, charges_enabled, and payouts_enabled flags in the driver profile table. Configure destination charges or separate charge and transfer architecture specifying the platform application fee percentage (e.g., 20% platform take-rate) and automated payout schedules. Implement endpoints for drivers to query their balance, payout history, and access the Stripe Express dashboard via single-sign-on login links (stripe.accounts.createLoginLink). Handle edge cases including onboarding drop-offs, country-specific KYC compliance requirements, and restricted capability webhooks (account.updated)."
+        },
+        {
+          "id": "payment-hold-capture",
+          "title": "Two-Phase Payment Authorization Hold & Capture Lifecycle",
+          "note": "Implement the complete ride payment lifecycle starting with a pre-authorization hold via stripe.paymentIntents.create with capture_method='manual' upon trip request confirmation. Attach customer PaymentMethods stored securely in Stripe Vault and pass the calculated upfront fare amount with setup_future_usage options for streamlined one-click rebooking. When the trip status transitions to COMPLETED, compute the final fare including actual mileage, wait-time fees, route tolls, and driver tips, then execute stripe.paymentIntents.capture with amount_to_capture. If the trip is cancelled before pickup within the grace period, call stripe.paymentIntents.cancel to release the held funds immediately and notify the rider. For non-grace cancellations, execute a partial capture corresponding to the standard platform cancellation fee."
+        },
+        {
+          "id": "webhook-handler-idempotency",
+          "title": "Idempotent Stripe Webhook Ingestion & Financial Ledger Logging",
+          "note": "Build the dedicated webhook listener endpoint POST /api/v1/payments/webhook configured with raw-body parsing to verify stripe-signature headers using stripe.Webhook.constructEvent. Handle critical asynchronous events including 'payment_intent.succeeded', 'payment_intent.payment_failed', 'charge.refunded', 'account.updated', and 'transfer.created'. Implement an idempotency guard using an 'idempotency_keys' database table with unique constraints on Stripe Event IDs to reject duplicate webhook deliveries gracefully with HTTP 200. On successful capture, write corresponding credit and debit entries to the immutable 'ledger_entries' table for rider charge, platform commission revenue, and driver payout liability. Implement retry mechanisms with dead-letter queue routing for downstream business logic failures during webhook handling."
+        }
+      ]
+    },
+    {
+      "id": "phase-5-realtime-launch",
+      "title": "Phase 5: Real-Time Telemetry, Push Notifications & Production Launch",
+      "description": "Scale WebSocket telemetry for live map tracking, configure high-priority FCM push notifications for critical ride events, and execute the production readiness checklist.",
+      "tip": "Throttling and batching driver telemetry updates at 1-2 Hz intervals prevents saturating client rendering threads and backend WebSocket servers while maintaining smooth vehicle animation on maps. Implement exponential reconnection backoffs with heartbeat pings on mobile WebSocket connections to gracefully recover from cellular handoffs between Wi-Fi and 5G towers. Conduct end-to-end chaos engineering tests against simulated database failovers, Redis network partitions, and third-party payment gateway latency prior to launch.",
+      "tasks": [
+        {
+          "id": "websocket-location-streaming",
+          "title": "WebSocket Telemetry & Live Map Route Interpolation",
+          "note": "Deploy high-throughput WebSocket gateway endpoints at /ws/v1/tracking authenticated via handshake query token validation. Connect WebSocket worker nodes to Redis Pub/Sub channels keyed by trip ID ('trips:tracking:<trip_id>') to broadcast driver location updates to connected rider apps with sub-100ms latency. Throttle location transmissions from driver devices to 1 Hz, embedding GPS coordinates, compass bearing, vehicle speed, and accuracy radius within the payload. Implement client-side linear interpolation (lerp) and bezier spline smoothing on Mapbox/Google Maps SDKs to render smooth vehicle movement between GPS update intervals. Handle abrupt socket disconnects, automatic session resumption via message sequence IDs, and channel cleanup upon trip completion."
+        },
+        {
+          "id": "fcm-push-notifications",
+          "title": "Firebase Cloud Messaging (FCM) & Apple APNs Push Dispatcher",
+          "note": "Integrate the Firebase Admin SDK to deliver low-latency, high-priority push notifications and Apple Push Notification service (APNs) VoIP/Live Activity pings. Create the background notification worker listening to trip state transitions to dispatch alerts for DRIVER_ASSIGNED, DRIVER_ARRIVED, TRIP_STARTED, and RECEIPT_READY. Manage multi-device user device tokens in a 'device_tokens' table with automated invalidation when FCM returns 'messaging/registration-token-not-registered'. Configure notification channels on Android 8.0+ and APNs alert payloads with custom sound files, action buttons (e.g., 'Call Driver', 'Cancel Ride'), and high-priority flags for urgent dispatch alerts. Handle offline delivery fallback, localized notification templates in multiple languages, and badge count synchronizations across devices."
+        },
+        {
+          "id": "production-deployment-checklist",
+          "title": "Production Hardening, Load Testing & Launch Readiness",
+          "note": "Execute the comprehensive production readiness checklist across cloud infrastructure, security, monitoring, and compliance. Deploy containerized microservices to Kubernetes (EKS/GKE) or AWS ECS with auto-scaling policies based on CPU utilization and active WebSocket connection counts. Conduct stress and load testing with k6 or Locust simulating 10,000 concurrent riders and 2,500 active drivers generating spatial queries and booking requests. Implement distributed tracing with OpenTelemetry, structured JSON logging with Datadog/ELK, and Prometheus/Grafana dashboards for real-time tracking of matching latency, payment failures, and API 5xx errors. Finalize security audits covering OWASP Top 10 vulnerabilities, PCI-DSS compliance verification for Stripe tokenization, automated database point-in-time backups, and a multi-region disaster recovery runbook."
+        }
+      ]
+    }
+  ]
+}

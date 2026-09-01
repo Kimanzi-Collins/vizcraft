@@ -7,9 +7,9 @@
   <p><b>Highly interactive, self-contained architecture maps and progress trackers generated from a single JSON file.</b></p>
   
   <p>
-    <a href="https://github.com/Kimanzi-Collins/vizcraft/stargazers"><img src="https://img.shields.io/github/stars/Kimanzi-Collins/vizcraft?style=for-the-badge&color=ffd700&logo=star" alt="Stars" /></a>
-    <a href="https://github.com/Kimanzi-Collins/vizcraft/network/members"><img src="https://img.shields.io/github/forks/Kimanzi-Collins/vizcraft?style=for-the-badge&color=007ec6&logo=git" alt="Forks" /></a>
-    <a href="https://github.com/Kimanzi-Collins/vizcraft/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Kimanzi-Collins/vizcraft?style=for-the-badge&color=success" alt="License" /></a>
+    <a href="https://github.com/Kimanzi-Collins/vizcraft/stargazers"><img src="https://img.shields.io/github/stars/Kimanzi-Collins/vizcraft?style=for-the-badge&color=ffd700&logo=star&cacheSeconds=60" alt="Stars" /></a>
+    <a href="https://github.com/Kimanzi-Collins/vizcraft/network/members"><img src="https://img.shields.io/github/forks/Kimanzi-Collins/vizcraft?style=for-the-badge&color=007ec6&logo=git&cacheSeconds=60" alt="Forks" /></a>
+    <a href="https://github.com/Kimanzi-Collins/vizcraft/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Kimanzi-Collins/vizcraft?style=for-the-badge&color=success&cacheSeconds=60" alt="License" /></a>
   </p>
 </div>
 

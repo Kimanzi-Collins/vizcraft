@@ -43,9 +43,33 @@ VizCraft turns pure JSON data into stunning, interactive HTML visualizations wit
 
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.gif" width="100%">
 
+## 📦 Install as an AI Agent Skill
+
+Install VizCraft directly into your AI coding agent (Claude Code, Cursor, Antigravity, Copilot, Cline, Codex, etc.) with a single command:
+
+```bash
+# Install into your current workspace
+npx skills add Kimanzi-Collins/vizcraft
+
+# Or install globally across all your coding agents
+npx skills add Kimanzi-Collins/vizcraft -g
+```
+
+Once installed, your agent automatically reads `SKILL.md` to design and generate architecture diagrams and progress trackers on demand.
+
+<img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.gif" width="100%">
+
 ## ⚡ Quick Start
 
-Get your visualization up and running in 10 seconds:
+### 1. Direct CLI Generation (No Git Clone Required)
+
+Run directly using `npx`:
+
+```bash
+npx vizcraft <input.json> <output.html>
+```
+
+### 2. Python Setup
 
 ```bash
 # 1. Clone the repo
@@ -65,7 +89,11 @@ python generate.py demos/demo_progress.json output/demo.html
 The CLI auto-detects whether your JSON is an architecture map or a progress tracker based on its keys.
 
 ```bash
+# Python
 python generate.py <input.json> <output.html>
+
+# Node / npx
+npx vizcraft <input.json> <output.html>
 ```
 
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.gif" width="100%">
@@ -105,9 +133,13 @@ See `schemas/progress.schema.json` for the full schema.
 
 ## 🤖 Using with AI Agents
 
-VizCraft was explicitly built to be a **tool for AI agents**. By passing the `SKILL.md` file to any capable LLM (like Claude 3.5 Sonnet, Gemini 2.5 Pro, or GPT-4o), the AI can instantly learn how to generate highly complex, interactive visualizers for your system.
+VizCraft is natively packaged as an agent skill. You can install it into Claude Code, Cursor, Copilot, Antigravity, Cline, and other supported agents with:
 
-See [SKILL.md](SKILL.md) for the exact prompt instructions you should feed to your agent.
+```bash
+npx skills add Kimanzi-Collins/vizcraft
+```
+
+Once added, the agent automatically ingests [SKILL.md](SKILL.md) to understand the layout schemas, theme options, SVG logo injection, and spatial reasoning rules needed to generate visualizations for your projects.
 
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.gif" width="100%">
 

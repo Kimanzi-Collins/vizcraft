@@ -1,0 +1,35 @@
+{
+  "name": "vizcraft",
+  "version": "1.0.0",
+  "description": "Interactive, self-contained architecture diagrams and progress visualizations generated from JSON",
+  "main": "bin/vizcraft.js",
+  "bin": {
+    "vizcraft": "./bin/vizcraft.js"
+  },
+  "scripts": {
+    "start": "node bin/vizcraft.js demos/demo_progress.json output/demo.html",
+    "generate": "node bin/vizcraft.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kimanzi-Collins/vizcraft.git"
+  },
+  "keywords": [
+    "agent-skill",
+    "skills",
+    "ai-agent",
+    "claude-code",
+    "cursor",
+    "copilot",
+    "antigravity",
+    "architecture-diagram",
+    "progress-tracker",
+    "visualization"
+  ],
+  "author": "Kimanzi Collins",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kimanzi-Collins/vizcraft/issues"
+  },
+  "homepage": "https://github.com/Kimanzi-Collins/vizcraft#readme"
+}

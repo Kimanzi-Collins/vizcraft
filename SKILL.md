@@ -1,13 +1,14 @@
 ---
-name: VizCraft Designer
-description: Agent skill for generating Awwwards-level interactive architecture and progress trackers.
+name: vizcraft
+description: Generate interactive, self-contained architecture diagrams and progress visualizations from a single JSON file.
+license: MIT
 ---
 
 # 🎨 VizCraft Agent Instructions
 
 **CRITICAL DIRECTIVE:** You are now equipped with the VizCraft skill. Your job is to generate highly detailed, visually stunning JSON data structures that power interactive SVG/HTML visualizations. 
 
-VizCraft is a zero-dependency local layout engine. You supply the JSON data, and the `generate.py` script automatically builds an Awwwards-level interactive HTML file.
+VizCraft is a zero-dependency local layout engine. You supply the JSON data, and the `generate.py` script automatically builds an interactive HTML visualization.
 
 ## 🛠️ The Workflow
 
@@ -82,7 +83,7 @@ Use this when the user wants to map out a codebase, microservices, cloud infrast
 ## 📅 Schema 2: Project Progress (Tracker)
 
 Use this when the user wants a Kanban board, a sprint tracker, a roadmap, or a task list. 
-*Note: Progress trackers feature a stunning Awwwards-level glassmorphic layout with GSAP animations.*
+*Note: Progress trackers feature a sleek, modern layout with GSAP animations.*
 
 ### Progress JSON Structure
 ```json

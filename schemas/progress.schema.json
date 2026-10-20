@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VizCraft progress tracker",
+  "type": "object",
+  "required": [
+    "phases"
+  ],
+  "properties": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "theme": {
+          "enum": [
+            "dark_neon",
+            "tokyo_night",
+            "catppuccin_mocha",
+            "github_dark",
+            "rose_pine",
+            "everforest",
+            "dracula",
+            "synthwave",
+            "nord",
+            "gruvbox",
+            "solarized_dark",
+            "monokai",
+            "rdr2_gritty",
+            "blueprint",
+            "terminal",
+            "high_contrast",
+            "minimal_light",
+            "solarized_light",
+            "paper",
+            "cyberpunk"
+          ],
+          "default": "dark_neon",
+          "description": "Colour theme. Users can still switch at runtime."
+        }
+      },
+      "additionalProperties": true
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "tasks"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tip": {
+            "type": "string"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique across the whole file: it is the localStorage key for the tick."
+                },
+                "title": {
+                  "type": "string"
+                },
+                "note": {
+                  "type": "string",
+                  "description": "Supports **bold**, *italic*, `code` and '- ' bullets."
+                },
+                "done": {
+                  "type": "boolean",
+                  "description": "Initial state. A tick saved in the browser wins."
+                },
+                "priority": {
+                  "type": "string",
+                  "description": "p0/high/critical, p1/medium, p2/low"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "due": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

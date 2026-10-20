@@ -1,7 +1,7 @@
 {
   "name": "vizcraft",
-  "version": "1.0.0",
-  "description": "Interactive, self-contained architecture diagrams and progress visualizations generated from JSON",
+  "version": "1.1.0",
+  "description": "Interactive, self-contained architecture diagrams, flowcharts and progress trackers generated from JSON",
   "main": "bin/vizcraft.js",
   "bin": {
     "vizcraft": "./bin/vizcraft.js"
@@ -24,7 +24,9 @@
     "antigravity",
     "architecture-diagram",
     "progress-tracker",
-    "visualization"
+    "visualization",
+    "flowchart",
+    "auto-layout"
   ],
   "author": "Kimanzi Collins",
   "license": "MIT",

@@ -1,134 +1,132 @@
 ---
 name: vizcraft
-description: Generate interactive, self-contained architecture diagrams and progress visualizations from a single JSON file.
+description: Generate interactive, self-contained architecture diagrams, flowcharts and progress trackers from a single JSON file. Auto-layout, collision-free edge routing, 20 themes.
 license: MIT
 ---
 
 # 🎨 VizCraft Agent Instructions
 
-**CRITICAL DIRECTIVE:** You are now equipped with the VizCraft skill. Your job is to generate highly detailed, visually stunning JSON data structures that power interactive SVG/HTML visualizations. 
-
-VizCraft is a zero-dependency local layout engine. You supply the JSON data, and the `generate.py` script automatically builds an interactive HTML visualization.
+You can turn a JSON description into an interactive HTML visualization with **no dependencies**. You write the JSON; `generate.py` validates it and builds the page. Layout and edge routing are done by VizCraft, so **you do not need to calculate coordinates**.
 
 ## 🛠️ The Workflow
 
-1. **Understand the User's Request:** Are they asking for a system architecture diagram or a project progress tracker?
-2. **Draft the JSON:** Use the appropriate schema below to draft the JSON structure.
-3. **Save the JSON:** Save your output to a `.json` file in the user's workspace.
-4. **Compile the HTML:** Run `python generate.py <your_json_file.json> <output_html_file.html>`
-5. **Serve/Open:** Provide the user with the path to the HTML file or use a tool to open it in their browser.
+1. **Pick the type:** system/infra/agent map or flowchart → *architecture* (Schema 1). Roadmap, sprint board, task list → *progress* (Schema 2).
+2. **Write the JSON** to a `.json` file in the user's workspace.
+3. **Validate and build:** `python generate.py <file.json> <out.html>`
+   - Read the `WARN` lines it prints and **fix every one**, then re-run. They catch dangling edges, duplicate ids, unknown kinds/themes, overlapping boxes and bad story ids.
+   - Validate only: `python generate.py <file.json> --check`. Fail on warnings: add `--strict`.
+4. **Open it:** give the user the HTML path (or `--open` to launch the browser).
+
+Useful: `python generate.py --list-themes`. Full JSON Schemas are in `schemas/`.
 
 ---
 
-## 🏗️ Schema 1: System Architecture
+## 🏗️ Schema 1: Architecture (also flowcharts)
 
-Use this when the user wants to map out a codebase, microservices, cloud infrastructure, or AI agent workflow.
-
-### Architecture JSON Structure
 ```json
 {
   "project": {
-    "name": "Project Name",
-    "description": "Short description of the system",
-    "theme": "dark_neon"
+    "name": "Checkout System",
+    "description": "Order flow from cart to fulfilment",
+    "theme": "tokyo_night",
+    "edgeStyle": "orthogonal",
+    "nodeStyle": "card",
+    "direction": "LR"
   },
   "groups": [
     {
-      "id": "backend_group",
-      "label": "Backend Core",
-      "x": 100, "y": 100,
-      "width": 400, "height": 300,
+      "id": "backend", "label": "Backend",
       "nodes": [
-        {
-          "id": "api_server",
-          "label": "FastAPI Server",
-          "kind": "entry",
+        { "id": "api", "label": "Orders API", "kind": "service",
           "logo": "https://cdn.simpleicons.org/fastapi/ffffff",
-          "x": 20, "y": 40
-        }
+          "description": "Validates carts and creates orders.", "tags": ["Python"] },
+        { "id": "db", "label": "Postgres", "kind": "store", "shape": "cylinder" }
       ]
     }
   ],
   "standalone": [
-    { "id": "db", "label": "PostgreSQL", "kind": "store", "logo": "https://cdn.simpleicons.org/postgresql/ffffff", "x": -100, "y": 200 }
+    { "id": "shopper", "label": "Shopper", "kind": "user" }
   ],
   "edges": [
-    {
-      "source": "api_server",
-      "target": "db",
-      "label": "SQL Queries",
-      "sourcePort": "right",
-      "targetPort": "left"
-    }
+    { "source": "shopper", "target": "api", "label": "HTTPS" },
+    { "source": "api", "target": "db", "label": "SQL" },
+    { "source": "api", "target": "db", "label": "read replica", "style": "dashed" }
   ],
   "steps": [
-    {
-      "title": "1. User Request",
-      "description": "The request hits the API server.",
-      "highlight": ["api_server", "db"]
-    }
+    { "title": "Shopper checks out", "description": "The request reaches the API.", "highlight": ["shopper", "api"] }
   ]
 }
 ```
 
-### Design Rules for Architecture:
-- **Spatial Reasoning & Spacing:** THIS IS CRITICAL. You must manually calculate `x` and `y` coordinates for groups and nodes to prevent overlapping. Visualize a grid: use multiples of 100 or 150 for `x` and `y` to keep nodes perfectly aligned. Make sure the parent `group`'s `width` and `height` fully encapsulates its inner nodes. 
-- **Grouping:** Group related nodes together into logical clusters (e.g., "Edge", "Core", "Database"). This makes the graph visually striking and easy to read.
-- **Node Kinds:** `entry`, `agent`, `service`, `store`, `external`, `model`, `cron`, `tool`.
-- **Logos (New):** You can now specify an exact SVG logo URL for nodes using the `logo` key. Use `https://cdn.simpleicons.org/<icon_name>/ffffff` for standard tech logos!
-- **Story Mode:** Always include at least 3 `steps` to explain the flow. This powers the interactive "Story" tab.
+### Layout: let VizCraft do it (default)
+- **Omit `x`/`y` everywhere** and VizCraft lays groups and nodes out in layers following the edge direction (`direction`: `LR` left→right, or `TB` top→bottom). This is the recommended path and cannot produce overlaps.
+- Only set coordinates if the user wants an exact arrangement. Then it is all-or-nothing: give **every** group and standalone node `x`/`y` (node `x`/`y` are relative to their group), keep ≥ 40 px between boxes, and make `width`/`height` enclose the nodes. The validator reports overlaps.
+- Nodes are at least 120×34 px (wider for long labels). Keep labels short (≤ 24 chars).
+
+### Nodes
+- `kind` (colour + icon): `entry` `agent` `service` `store` `external` `model` `cron` `tool` `queue` `gateway` `client` `cache` `function` `user` `monitor` `security`.
+  Aliases also work: `database`→store, `api`→service, `lambda`→function, `llm`→model, `broker`→queue, `lb`/`cdn`→gateway, `auth`→security, `start`→entry, `end`→external, `decision`→agent.
+- `shape`: `rect` (default), `pill` (start/end, entry points), `diamond` (decisions), `hexagon` (processing/prepare), `cylinder` (databases).
+- `logo`: `https://cdn.simpleicons.org/<slug>/ffffff` (white logos are auto-inverted on light themes). Check the slug exists; if it fails the kind icon is used.
+- `description` and `tags` appear in the hover tooltip. Use them, they make diagrams self-explaining.
+
+### Edges
+- `label` (keep short), `style`: `solid` | `dashed` (async/optional) | `dotted` (telemetry/weak), `bidirectional: true`, `color`.
+- **Do not set `sourcePort`/`targetPort`** unless you must; the router picks sides, spreads parallel edges onto separate lanes and avoids nodes. A hint pointing away from the target is ignored.
+- Edges are routed without overlapping nodes or each other where space allows; labels are placed clear of nodes and other labels.
+
+### Flowcharts
+Use `standalone` nodes only, `"direction": "TB"`, shapes `pill` (start/end), `rect` (step), `diamond` (decision) and label branch edges `yes`/`no`. The first outgoing edge of a diamond keeps the straight-through port; later branches fan out sideways. See `demos/auth_flowchart.json`.
+
+### Story mode
+Add 3–6 `steps`. `highlight` takes node ids **or group ids**. The viewer zooms to the highlighted nodes, lights their edges and offers Prev / Play / Next (and ← → keys).
+
+### Project options
+| key | values | default |
+|---|---|---|
+| `theme` | see Themes | `dark_neon` |
+| `edgeStyle` | `orthogonal` (rounded), `curved`, `step` (sharp), `straight` | `orthogonal` |
+| `nodeStyle` | `card`, `tinted`, `outline` (neon glow) | `card` |
+| `direction` | `LR`, `TB` | `LR` |
+
+Users can change theme, edge style and node style live in the sidebar.
 
 ---
 
-## 📅 Schema 2: Project Progress (Tracker)
+## 📅 Schema 2: Progress tracker
 
-Use this when the user wants a Kanban board, a sprint tracker, a roadmap, or a task list. 
-*Note: Progress trackers feature a sleek, modern layout with GSAP animations.*
-
-### Progress JSON Structure
 ```json
 {
-  "project": {
-    "name": "Uber Clone Tracker",
-    "description": "MVP Sprint Roadmap",
-    "theme": "dark_neon"
-  },
+  "project": { "name": "Launch Plan", "description": "MVP roadmap", "theme": "catppuccin_mocha" },
   "phases": [
     {
-      "id": "phase1",
-      "title": "Phase 1: Foundation",
-      "description": "Core setup and infrastructure.",
-      "tip": "Ensure the database schema is locked before proceeding.",
+      "id": "phase1", "title": "Phase 1: Foundation", "description": "Core setup.",
+      "tip": "Lock the schema before building features.",
       "tasks": [
-        {
-          "id": "t1",
-          "title": "Setup PostgreSQL",
-          "note": "Use Docker compose for local dev.\n\nRun migrations."
-        }
+        { "id": "t1", "title": "Set up Postgres", "note": "Use Docker Compose.\n- run migrations\n- seed **test data**",
+          "done": true, "priority": "high", "owner": "Sam", "due": "Fri", "tags": ["db"] }
       ]
     }
   ]
 }
 ```
-
-### Design Rules for Progress Tracker:
-- **Phases:** Keep phases logical. 3 to 6 phases is ideal.
-- **Tasks:** 3 to 5 tasks per phase. 
-- **Notes:** Use the `note` field to provide extreme detail. This powers the interactive sidebar.
-- **Tips:** Always provide a highly intelligent `tip` for each phase.
+- 3–6 phases, 3–5 tasks each. **Task `id`s must be unique across the whole file** (they are the saved-progress keys).
+- `note` supports `**bold**`, `*italic*`, `` `code` `` and `- ` bullets. Be detailed; it fills the Notes panel.
+- Optional per task: `done` (initial state), `priority` (`p0`/`high`, `p1`/`medium`, `p2`/`low`), `owner`, `due`, `tags`.
+- Always give each phase a useful `tip`. Progress is saved in the browser's localStorage; the sidebar has *Hide completed*, *Reset progress* and a *Next up* shortcut.
 
 ---
 
-## 🎨 Theme Selection
-Always choose a theme that fits the vibe of the project.
-Available themes:
-1. `dark_neon` (Default) - Sleek, futuristic, high-contrast, glassmorphic.
-2. `cyberpunk` - Bright yellow/cyan/red, high aggression.
-3. `dracula` - Dark purple/pink classic Dracula palette.
-4. `synthwave` - Retro 80s magenta/purple outrun aesthetic.
-5. `nord` - Arctic, cold blue/gray tones.
-6. `gruvbox` - Warm retro groove box colors.
-7. `solarized_dark` - Classic teal/yellow.
-8. `monokai` - High contrast dark.
-9. `rdr2_gritty` - Warm, sepia.
-10. `minimal_light` - Clean, glassmorphic professional light mode.
+## 🎨 Themes (20)
+Choose one that fits the project's mood, and prefer a light theme for documents that will be printed or screenshotted into slides.
+
+**Dark:** `dark_neon` (default, clean), `tokyo_night`, `catppuccin_mocha`, `github_dark`, `rose_pine`, `everforest`, `dracula`, `synthwave`, `nord`, `gruvbox`, `solarized_dark`, `monokai`, `rdr2_gritty` (sepia/serif), `blueprint` (engineering blue), `terminal` (green CRT), `high_contrast` (accessibility).
+**Light:** `minimal_light`, `solarized_light`, `paper` (serif, print-friendly), `cyberpunk` (loud yellow).
+
+`python generate.py --list-themes` prints the current list. All themes meet WCAG AA contrast for text.
+
+## ✅ Checklist before you hand over
+- `generate.py` ran with **no WARN lines**.
+- Every edge `source`/`target` and every `highlight` id exists.
+- Labels are short; nodes have `description`s; ≥ 3 story steps.
+- You told the user the output path and that they can switch themes/edge style in the sidebar.

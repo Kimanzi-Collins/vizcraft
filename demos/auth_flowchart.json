@@ -1,0 +1,42 @@
+{
+  "project": {
+    "name": "Login & MFA Flow",
+    "description": "A flowchart built with shapes and auto-layout: no coordinates anywhere.",
+    "theme": "tokyo_night",
+    "direction": "TB"
+  },
+  "standalone": [
+    { "id": "start", "label": "User opens app", "kind": "start", "shape": "pill" },
+    { "id": "creds", "label": "Enter credentials", "kind": "client", "description": "Email + password form with rate limiting after 5 attempts." },
+    { "id": "valid", "label": "Credentials valid?", "kind": "decision", "shape": "diamond" },
+    { "id": "mfa_on", "label": "MFA enabled?", "kind": "decision", "shape": "diamond" },
+    { "id": "otp", "label": "Verify one-time code", "kind": "security", "tags": ["TOTP", "SMS fallback"] },
+    { "id": "otp_ok", "label": "Code correct?", "kind": "decision", "shape": "diamond" },
+    { "id": "session", "label": "Issue session token", "kind": "service", "shape": "hexagon", "description": "Signed JWT, 15 min expiry, refresh token in an HttpOnly cookie." },
+    { "id": "store", "label": "Sessions DB", "kind": "store", "shape": "cylinder" },
+    { "id": "home", "label": "Dashboard", "kind": "entry", "shape": "pill" },
+    { "id": "fail", "label": "Show error + log attempt", "kind": "monitor" },
+    { "id": "lock", "label": "Lock account (15 min)", "kind": "security" }
+  ],
+  "edges": [
+    { "source": "start", "target": "creds" },
+    { "source": "creds", "target": "valid" },
+    { "source": "valid", "target": "mfa_on", "label": "yes" },
+    { "source": "valid", "target": "fail", "label": "no" },
+    { "source": "fail", "target": "creds", "label": "retry", "style": "dashed" },
+    { "source": "fail", "target": "lock", "label": "5 failures", "style": "dotted" },
+    { "source": "mfa_on", "target": "otp", "label": "yes" },
+    { "source": "mfa_on", "target": "session", "label": "no" },
+    { "source": "otp", "target": "otp_ok" },
+    { "source": "otp_ok", "target": "session", "label": "yes" },
+    { "source": "otp_ok", "target": "fail", "label": "no" },
+    { "source": "session", "target": "store", "label": "persist" },
+    { "source": "session", "target": "home" }
+  ],
+  "steps": [
+    { "title": "Collect credentials", "description": "The user submits email and password. Attempts are rate limited.", "highlight": ["start", "creds", "valid"] },
+    { "title": "Branch on MFA", "description": "Valid credentials go straight to a session unless the account has MFA enabled.", "highlight": ["valid", "mfa_on", "otp", "otp_ok", "session"] },
+    { "title": "Failure path", "description": "Wrong password or wrong code is logged and retried; repeated failures lock the account.", "highlight": ["valid", "otp_ok", "fail", "lock", "creds"] },
+    { "title": "Session issued", "description": "A signed token is persisted and the user lands on the dashboard.", "highlight": ["session", "store", "home"] }
+  ]
+}

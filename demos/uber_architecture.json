@@ -32,10 +32,9 @@
         {
           "id": "api_gw",
           "label": "API Gateway (HAProxy)",
-          "kind": "service",
+          "kind": "gateway",
           "x": 20,
-          "y": 180,
-          "logo": "https://cdn.simpleicons.org/haproxy/ffffff"
+          "y": 180
         }
       ]
     },

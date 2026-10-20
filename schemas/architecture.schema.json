@@ -1,0 +1,345 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VizCraft architecture diagram",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "theme": {
+          "enum": [
+            "dark_neon",
+            "tokyo_night",
+            "catppuccin_mocha",
+            "github_dark",
+            "rose_pine",
+            "everforest",
+            "dracula",
+            "synthwave",
+            "nord",
+            "gruvbox",
+            "solarized_dark",
+            "monokai",
+            "rdr2_gritty",
+            "blueprint",
+            "terminal",
+            "high_contrast",
+            "minimal_light",
+            "solarized_light",
+            "paper",
+            "cyberpunk"
+          ],
+          "default": "dark_neon",
+          "description": "Colour theme. Users can still switch at runtime."
+        },
+        "edgeStyle": {
+          "enum": [
+            "orthogonal",
+            "curved",
+            "step",
+            "straight"
+          ],
+          "default": "orthogonal"
+        },
+        "nodeStyle": {
+          "enum": [
+            "card",
+            "tinted",
+            "outline"
+          ],
+          "default": "card"
+        },
+        "direction": {
+          "enum": [
+            "LR",
+            "TB"
+          ],
+          "default": "LR",
+          "description": "Flow direction used by auto-layout."
+        }
+      },
+      "additionalProperties": true
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "nodes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number",
+            "description": "Minimum width; the box grows to fit its nodes."
+          },
+          "height": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string",
+            "description": "A kind name (uses the theme colour) or any CSS colour for the border and label."
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique across all groups and nodes."
+                },
+                "label": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "description": "One of the known kinds, or an alias such as database, api, lambda, llm, start, decision. Unknown values render grey.",
+                  "examples": [
+                    "entry",
+                    "agent",
+                    "service",
+                    "store",
+                    "external",
+                    "model",
+                    "cron",
+                    "tool",
+                    "queue",
+                    "gateway",
+                    "client",
+                    "cache",
+                    "function",
+                    "user",
+                    "monitor",
+                    "security"
+                  ]
+                },
+                "shape": {
+                  "enum": [
+                    "rect",
+                    "pill",
+                    "diamond",
+                    "hexagon",
+                    "cylinder"
+                  ],
+                  "default": "rect"
+                },
+                "logo": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "e.g. https://cdn.simpleicons.org/postgresql/ffffff. Falls back to the kind icon if it fails to load."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Shown in the hover tooltip."
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "x": {
+                  "type": "number",
+                  "description": "Relative to the group (or absolute for standalone nodes). Omit for auto-layout."
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "standalone": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique across all groups and nodes."
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "One of the known kinds, or an alias such as database, api, lambda, llm, start, decision. Unknown values render grey.",
+            "examples": [
+              "entry",
+              "agent",
+              "service",
+              "store",
+              "external",
+              "model",
+              "cron",
+              "tool",
+              "queue",
+              "gateway",
+              "client",
+              "cache",
+              "function",
+              "user",
+              "monitor",
+              "security"
+            ]
+          },
+          "shape": {
+            "enum": [
+              "rect",
+              "pill",
+              "diamond",
+              "hexagon",
+              "cylinder"
+            ],
+            "default": "rect"
+          },
+          "logo": {
+            "type": "string",
+            "format": "uri",
+            "description": "e.g. https://cdn.simpleicons.org/postgresql/ffffff. Falls back to the kind icon if it fails to load."
+          },
+          "description": {
+            "type": "string",
+            "description": "Shown in the hover tooltip."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "x": {
+            "type": "number",
+            "description": "Relative to the group (or absolute for standalone nodes). Omit for auto-layout."
+          },
+          "y": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "target"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "sourcePort": {
+            "enum": [
+              "top",
+              "bottom",
+              "left",
+              "right",
+              "auto"
+            ]
+          },
+          "targetPort": {
+            "enum": [
+              "top",
+              "bottom",
+              "left",
+              "right",
+              "auto"
+            ]
+          },
+          "style": {
+            "enum": [
+              "solid",
+              "dashed",
+              "dotted"
+            ],
+            "default": "solid"
+          },
+          "bidirectional": {
+            "type": "boolean"
+          },
+          "color": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Node ids or group ids."
+          }
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "groups"
+      ]
+    },
+    {
+      "required": [
+        "standalone"
+      ]
+    },
+    {
+      "required": [
+        "edges"
+      ]
+    }
+  ]
+}

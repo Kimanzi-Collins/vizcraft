@@ -1,0 +1,56 @@
+{
+  "project": {
+    "name": "SaaS Platform",
+    "description": "Grouped architecture with auto-layout, new node kinds, curved edges and tinted nodes. No coordinates.",
+    "theme": "catppuccin_mocha",
+    "edgeStyle": "curved",
+    "nodeStyle": "tinted"
+  },
+  "standalone": [
+    { "id": "visitor", "label": "Visitor", "kind": "user" },
+    { "id": "stripe", "label": "Stripe", "kind": "external", "logo": "https://cdn.simpleicons.org/stripe/ffffff", "description": "Handles subscriptions and invoices." }
+  ],
+  "groups": [
+    { "id": "edge", "label": "Edge", "nodes": [
+      { "id": "cdn", "label": "CDN", "kind": "gateway", "logo": "https://cdn.simpleicons.org/cloudflare/ffffff" },
+      { "id": "web", "label": "Next.js App", "kind": "client", "logo": "https://cdn.simpleicons.org/nextdotjs/ffffff" },
+      { "id": "waf", "label": "WAF & Rate Limits", "kind": "security" }
+    ] },
+    { "id": "core", "label": "Core Services", "nodes": [
+      { "id": "api", "label": "GraphQL API", "kind": "service", "logo": "https://cdn.simpleicons.org/graphql/ffffff", "description": "Single entry point for the web app and mobile clients." },
+      { "id": "auth", "label": "Auth Service", "kind": "security" },
+      { "id": "billing", "label": "Billing Worker", "kind": "function" },
+      { "id": "search", "label": "Search Indexer", "kind": "agent" }
+    ] },
+    { "id": "data", "label": "Data", "nodes": [
+      { "id": "pg", "label": "Postgres", "kind": "store", "shape": "cylinder", "logo": "https://cdn.simpleicons.org/postgresql/ffffff" },
+      { "id": "redis", "label": "Redis Cache", "kind": "cache", "logo": "https://cdn.simpleicons.org/redis/ffffff" },
+      { "id": "queue", "label": "Job Queue", "kind": "queue" }
+    ] },
+    { "id": "obs", "label": "Observability", "nodes": [
+      { "id": "metrics", "label": "Metrics & Alerts", "kind": "monitor", "logo": "https://cdn.simpleicons.org/grafana/ffffff" }
+    ] }
+  ],
+  "edges": [
+    { "source": "visitor", "target": "cdn", "label": "HTTPS" },
+    { "source": "cdn", "target": "waf" },
+    { "source": "waf", "target": "web" },
+    { "source": "web", "target": "api", "label": "GraphQL" },
+    { "source": "api", "target": "auth", "label": "verify" },
+    { "source": "api", "target": "pg", "label": "SQL" },
+    { "source": "api", "target": "redis", "label": "cache", "style": "dashed" },
+    { "source": "api", "target": "queue", "label": "enqueue" },
+    { "source": "queue", "target": "billing", "style": "dashed" },
+    { "source": "queue", "target": "search", "style": "dashed" },
+    { "source": "billing", "target": "stripe", "label": "charge", "bidirectional": true },
+    { "source": "billing", "target": "pg" },
+    { "source": "search", "target": "pg", "label": "read" },
+    { "source": "api", "target": "metrics", "style": "dotted", "label": "traces" }
+  ],
+  "steps": [
+    { "title": "Request enters at the edge", "description": "Traffic hits the CDN, passes the WAF and reaches the Next.js app.", "highlight": ["visitor", "cdn", "waf", "web"] },
+    { "title": "API orchestrates", "description": "The GraphQL API authenticates, reads through the cache and talks to Postgres.", "highlight": ["web", "api", "auth", "redis", "pg"] },
+    { "title": "Async work", "description": "Slow work is queued and picked up by the billing worker and search indexer.", "highlight": ["api", "queue", "billing", "search", "stripe"] },
+    { "title": "Observed end to end", "description": "The API emits traces to the metrics stack.", "highlight": ["api", "metrics"] }
+  ]
+}

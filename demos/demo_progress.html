@@ -10,132 +10,427 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <style>
     :root {
-      /* Base transitions */
-      --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
       --font-sans: 'Plus Jakarta Sans', sans-serif;
-      --font-mono: 'Space Mono', monospace;
-      
-      /* Default Theme: dark_neon (Awwwards Glassmorphism) */
-      --bg-color: #050505;
-      --surface-color: rgba(20, 20, 22, 0.6);
-      --border-color: rgba(255, 255, 255, 0.08);
-      --text-main: #f8f8f8;
-      --text-muted: #8a8f98;
-      --accent: #ffffff;
-      --complete-color: #10b981;
-      
-      /* Phase Colors (Neon/Vibrant) */
-      --phase-1: #3b82f6; /* Blue */
-      --phase-2: #8b5cf6; /* Purple */
-      --phase-3: #10b981; /* Green */
-      --phase-4: #f59e0b; /* Orange */
-      --phase-5: #ec4899; /* Pink */
-      --phase-6: #06b6d4; /* Cyan */
     }
 
-    [data-theme="rdr2_gritty"] {
-      --font-sans: Georgia, serif;
-      --font-mono: 'Courier New', Courier, monospace;
-      --bg-color: #1a1511;
-      --surface-color: rgba(44, 36, 28, 0.7);
-      --border-color: #4a3c2c;
-      --text-main: #e6d8c0;
-      --text-muted: #a69880;
-      --accent: #d63c3c;
-      --complete-color: #4ade80;
-    }
+    /*
+  VizCraft shared themes
+  ----------------------
+  Injected into every template at generate time (see generate.py).
 
-    [data-theme="minimal_light"] {
-      --bg-color: #f2f2f0;
-      --surface-color: rgba(255, 255, 255, 0.8);
-      --border-color: rgba(0, 0, 0, 0.08);
-      --text-main: #111111;
-      --text-muted: #666666;
-      --accent: #111111;
-      --complete-color: #10b981;
-    }
+  To add a theme:
+    1. Add a block below with a `@theme <id> | <Label>` marker comment.
+    2. Define at least the core tokens (bg / surface / border / text / accent).
+    3. Done. generate.py discovers the marker and the theme picker, the
+       validator and SKILL.md-listed names all pick it up from here.
 
-    [data-theme="cyberpunk"] {
-      --bg-color: #fce300;
-      --surface-color: rgba(252, 227, 0, 0.9);
-      --border-color: #000000;
-      --text-main: #000000;
-      --text-muted: #333333;
-      --accent: #ff003c;
-      --complete-color: #00f0ff;
-    }
-    
-    [data-theme="dracula"] {
-      --bg-color: #282a36;
-      --surface-color: rgba(40, 42, 54, 0.9);
-      --border-color: #44475a;
-      --text-main: #f8f8f2;
-      --text-muted: #6272a4;
-      --accent: #ff79c6;
-      --complete-color: #50fa7b;
-    }
+  Tokens
+    --bg-color --surface-color --border-color --text-main --text-muted
+    --accent --complete-color            core palette
+    --group-fill --node-fill --node-stroke   architecture surfaces
+    --dot-color                          background grid dots
+    --kind-<kind>                        node colours (architecture)
+    --phase-1..6                         phase colours (progress)
+*/
 
-    [data-theme="synthwave"] {
-      --bg-color: #2b213a;
-      --surface-color: rgba(43, 33, 58, 0.9);
-      --border-color: #241b2f;
-      --text-main: #f9f9f9;
-      --text-muted: #b891d4;
-      --accent: #f85b84;
-      --complete-color: #3fe0d0;
-    }
+:root {
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --font-mono: 'Space Mono', monospace;
 
-    [data-theme="nord"] {
-      --bg-color: #2e3440;
-      --surface-color: rgba(46, 52, 64, 0.9);
-      --border-color: #4c566a;
-      --text-main: #eceff4;
-      --text-muted: #d8dee9;
-      --accent: #88c0d0;
-      --complete-color: #a3be8c;
-    }
-    
-    [data-theme="gruvbox"] {
-      --bg-color: #282828;
-      --surface-color: rgba(40, 40, 40, 0.9);
-      --border-color: #3c3836;
-      --text-main: #ebdbb2;
-      --text-muted: #a89984;
-      --accent: #fe8019;
-      --complete-color: #b8bb26;
-    }
-    
-    [data-theme="solarized_dark"] {
-      --bg-color: #002b36;
-      --surface-color: rgba(0, 43, 54, 0.9);
-      --border-color: #073642;
-      --text-main: #839496;
-      --text-muted: #586e75;
-      --accent: #b58900;
-      --complete-color: #2aa198;
-    }
-    
-    [data-theme="monokai"] {
-      --bg-color: #272822;
-      --surface-color: rgba(39, 40, 34, 0.9);
-      --border-color: #3e3d32;
-      --text-main: #f8f8f2;
-      --text-muted: #75715e;
-      --accent: #fd971f;
-      --complete-color: #a6e22e;
-    }
+  /* Default kind palette (dark backgrounds) */
+  --kind-entry: #3b82f6;
+  --kind-agent: #f59e0b;
+  --kind-service: #8b5cf6;
+  --kind-store: #10b981;
+  --kind-external: #06b6d4;
+  --kind-model: #ec4899;
+  --kind-cron: #f97316;
+  --kind-tool: #84cc16;
+  --kind-queue: #d946ef;
+  --kind-gateway: #14b8a6;
+  --kind-client: #60a5fa;
+  --kind-cache: #facc15;
+  --kind-function: #fb7185;
+  --kind-user: #cbd5e1;
+  --kind-monitor: #818cf8;
+  --kind-security: #ef4444;
+  --kind-default: #7a7f87;
+}
+
+/* Derived tokens: resolved on <body> so they follow the active theme. */
+body {
+  --track-bg: rgba(128, 128, 128, 0.18);
+  --hover-bg: rgba(128, 128, 128, 0.12);
+  --phase-1: var(--kind-entry);
+  --phase-2: var(--kind-service);
+  --phase-3: var(--kind-store);
+  --phase-4: var(--kind-agent);
+  --phase-5: var(--kind-model);
+  --phase-6: var(--kind-external);
+}
+
+/* ---------------------------------------------------------------- dark */
+
+/* @theme dark_neon | Dark Neon */
+:root, [data-theme="dark_neon"] {
+  --bg-color: #07070a;
+  --surface-color: rgba(18, 18, 22, 0.8);
+  --border-color: rgba(255, 255, 255, 0.09);
+  --text-main: #ececec;
+  --text-muted: #8a8f98;
+  --accent: #ffffff;
+  --complete-color: #10b981;
+  --group-fill: #0b0b0f;
+  --node-fill: #131318;
+  --node-stroke: rgba(255, 255, 255, 0.12);
+  --dot-color: rgba(255, 255, 255, 0.07);
+}
+
+/* @theme tokyo_night | Tokyo Night */
+[data-theme="tokyo_night"] {
+  --bg-color: #1a1b26;
+  --surface-color: rgba(26, 27, 38, 0.9);
+  --border-color: #2f334d;
+  --text-main: #c0caf5;
+  --text-muted: #7f88b3;
+  --accent: #7aa2f7;
+  --complete-color: #9ece6a;
+  --group-fill: #16161e;
+  --node-fill: #24283b;
+  --node-stroke: #3b4261;
+  --dot-color: rgba(122, 162, 247, 0.1);
+  --kind-entry: #7aa2f7; --kind-agent: #e0af68; --kind-service: #bb9af7; --kind-store: #9ece6a;
+  --kind-external: #7dcfff; --kind-model: #f7768e; --kind-cron: #ff9e64; --kind-tool: #73daca;
+}
+
+/* @theme catppuccin_mocha | Catppuccin Mocha */
+[data-theme="catppuccin_mocha"] {
+  --bg-color: #1e1e2e;
+  --surface-color: rgba(30, 30, 46, 0.9);
+  --border-color: #45475a;
+  --text-main: #cdd6f4;
+  --text-muted: #9399b2;
+  --accent: #cba6f7;
+  --complete-color: #a6e3a1;
+  --group-fill: #181825;
+  --node-fill: #313244;
+  --node-stroke: #45475a;
+  --dot-color: rgba(205, 214, 244, 0.07);
+  --kind-entry: #89b4fa; --kind-agent: #f9e2af; --kind-service: #cba6f7; --kind-store: #a6e3a1;
+  --kind-external: #89dceb; --kind-model: #f5c2e7; --kind-cron: #fab387; --kind-tool: #94e2d5;
+}
+
+/* @theme github_dark | GitHub Dark */
+[data-theme="github_dark"] {
+  --bg-color: #0d1117;
+  --surface-color: rgba(22, 27, 34, 0.9);
+  --border-color: #30363d;
+  --text-main: #e6edf3;
+  --text-muted: #8d96a0;
+  --accent: #2f81f7;
+  --complete-color: #3fb950;
+  --group-fill: #0a0e14;
+  --node-fill: #161b22;
+  --node-stroke: #30363d;
+  --dot-color: rgba(230, 237, 243, 0.06);
+  --kind-entry: #58a6ff; --kind-agent: #d29922; --kind-service: #bc8cff; --kind-store: #3fb950;
+  --kind-external: #39c5cf; --kind-model: #f778ba; --kind-cron: #f0883e; --kind-tool: #7ee787;
+}
+
+/* @theme rose_pine | Rose Pine */
+[data-theme="rose_pine"] {
+  --bg-color: #191724;
+  --surface-color: rgba(25, 23, 36, 0.9);
+  --border-color: #403d52;
+  --text-main: #e0def4;
+  --text-muted: #908caa;
+  --accent: #ebbcba;
+  --complete-color: #9ccfd8;
+  --group-fill: #16141f;
+  --node-fill: #26233a;
+  --node-stroke: #403d52;
+  --dot-color: rgba(224, 222, 244, 0.07);
+  --kind-entry: #9ccfd8; --kind-agent: #f6c177; --kind-service: #c4a7e7; --kind-store: #a3be8c;
+  --kind-external: #7aa2c4; --kind-model: #eb6f92; --kind-cron: #ebbcba; --kind-tool: #c0d99a;
+}
+
+/* @theme everforest | Everforest */
+[data-theme="everforest"] {
+  --bg-color: #2d353b;
+  --surface-color: rgba(45, 53, 59, 0.92);
+  --border-color: #475258;
+  --text-main: #d3c6aa;
+  --text-muted: #9da9a0;
+  --accent: #a7c080;
+  --complete-color: #a7c080;
+  --group-fill: #272e33;
+  --node-fill: #343f44;
+  --node-stroke: #475258;
+  --dot-color: rgba(211, 198, 170, 0.07);
+  --kind-entry: #7fbbb3; --kind-agent: #dbbc7f; --kind-service: #d699b6; --kind-store: #a7c080;
+  --kind-external: #83c092; --kind-model: #e67e80; --kind-cron: #e69875; --kind-tool: #b8c27e;
+  --kind-security: #f0787a;
+}
+
+/* @theme dracula | Dracula */
+[data-theme="dracula"] {
+  --bg-color: #282a36;
+  --surface-color: rgba(40, 42, 54, 0.92);
+  --border-color: #44475a;
+  --text-main: #f8f8f2;
+  --text-muted: #8a94c8;
+  --accent: #ff79c6;
+  --complete-color: #50fa7b;
+  --group-fill: #21222c;
+  --node-fill: #343746;
+  --node-stroke: #50536a;
+  --dot-color: rgba(248, 248, 242, 0.06);
+  --kind-entry: #8be9fd; --kind-agent: #f1fa8c; --kind-service: #bd93f9; --kind-store: #50fa7b;
+  --kind-external: #7ea8ff; --kind-model: #ff79c6; --kind-cron: #ffb86c; --kind-tool: #a4ffb0;
+  --kind-security: #ff6e6e;
+}
+
+/* @theme synthwave | Synthwave 84 */
+[data-theme="synthwave"] {
+  --bg-color: #2b213a;
+  --surface-color: rgba(43, 33, 58, 0.92);
+  --border-color: #463563;
+  --text-main: #f9f9f9;
+  --text-muted: #b891d4;
+  --accent: #f85b84;
+  --complete-color: #3fe0d0;
+  --group-fill: #231a31;
+  --node-fill: #34284a;
+  --node-stroke: #5a4580;
+  --dot-color: rgba(248, 91, 132, 0.12);
+}
+
+/* @theme nord | Nord */
+[data-theme="nord"] {
+  --bg-color: #2e3440;
+  --surface-color: rgba(46, 52, 64, 0.92);
+  --border-color: #4c566a;
+  --text-main: #eceff4;
+  --text-muted: #aab3c5;
+  --accent: #88c0d0;
+  --complete-color: #a3be8c;
+  --group-fill: #2a303b;
+  --node-fill: #3b4252;
+  --node-stroke: #4c566a;
+  --dot-color: rgba(236, 239, 244, 0.06);
+  --kind-entry: #81a1c1; --kind-agent: #ebcb8b; --kind-service: #b48ead; --kind-store: #a3be8c;
+  --kind-external: #88c0d0; --kind-model: #d08cae; --kind-cron: #d08770; --kind-tool: #a7c080;
+  --kind-queue: #c7a0d9; --kind-security: #e57d86;
+}
+
+/* @theme gruvbox | Gruvbox Dark */
+[data-theme="gruvbox"] {
+  --bg-color: #282828;
+  --surface-color: rgba(40, 40, 40, 0.92);
+  --border-color: #504945;
+  --text-main: #ebdbb2;
+  --text-muted: #a89984;
+  --accent: #fe8019;
+  --complete-color: #b8bb26;
+  --group-fill: #232323;
+  --node-fill: #32302f;
+  --node-stroke: #504945;
+  --dot-color: rgba(235, 219, 178, 0.06);
+  --kind-entry: #83a598; --kind-agent: #fabd2f; --kind-service: #d3869b; --kind-store: #b8bb26;
+  --kind-external: #8ec07c; --kind-model: #fb4934; --kind-cron: #fe8019; --kind-tool: #b8bb26;
+}
+
+/* @theme solarized_dark | Solarized Dark */
+[data-theme="solarized_dark"] {
+  --bg-color: #002b36;
+  --surface-color: rgba(0, 43, 54, 0.92);
+  --border-color: #0f4a58;
+  --text-main: #93a1a1;
+  --text-muted: #7f9aa1;
+  --accent: #b58900;
+  --complete-color: #2aa198;
+  --group-fill: #00252f;
+  --node-fill: #073642;
+  --node-stroke: #1a5563;
+  --dot-color: rgba(147, 161, 161, 0.08);
+  --kind-entry: #3a9be2; --kind-agent: #c99a00; --kind-service: #8a8fe0; --kind-store: #859900;
+  --kind-external: #2aa198; --kind-model: #e8589c; --kind-cron: #e8683a; --kind-tool: #7a9a00;
+}
+
+/* @theme monokai | Monokai */
+[data-theme="monokai"] {
+  --bg-color: #272822;
+  --surface-color: rgba(39, 40, 34, 0.92);
+  --border-color: #49483e;
+  --text-main: #f8f8f2;
+  --text-muted: #9b977f;
+  --accent: #fd971f;
+  --complete-color: #a6e22e;
+  --group-fill: #22231d;
+  --node-fill: #34352d;
+  --node-stroke: #4b4a3d;
+  --dot-color: rgba(248, 248, 242, 0.06);
+  --kind-entry: #66d9ef; --kind-agent: #e6db74; --kind-service: #ae81ff; --kind-store: #a6e22e;
+  --kind-external: #66d9ef; --kind-model: #f92672; --kind-cron: #fd971f; --kind-tool: #a6e22e;
+}
+
+/* @theme rdr2_gritty | RDR2 Gritty */
+[data-theme="rdr2_gritty"] {
+  --font-sans: Georgia, serif;
+  --font-mono: 'Courier New', Courier, monospace;
+  --bg-color: #14100c;
+  --surface-color: rgba(34, 27, 20, 0.9);
+  --border-color: #4a3c2c;
+  --text-main: #e6d8c0;
+  --text-muted: #a69880;
+  --accent: #d63c3c;
+  --complete-color: #4ade80;
+  --group-fill: #1a1510;
+  --node-fill: #241c14;
+  --node-stroke: #4a3c2c;
+  --dot-color: rgba(230, 216, 192, 0.07);
+  --kind-entry: #6f9bb5; --kind-agent: #d9a441; --kind-service: #9a7bb0; --kind-store: #7a9a5c;
+  --kind-external: #5fa39b; --kind-model: #c4607a; --kind-cron: #c9743a; --kind-tool: #a3a84a;
+}
+
+/* @theme blueprint | Blueprint */
+[data-theme="blueprint"] {
+  --font-sans: 'Space Mono', 'Courier New', monospace;
+  --bg-color: #0a2f5c;
+  --surface-color: rgba(10, 47, 92, 0.92);
+  --border-color: rgba(255, 255, 255, 0.28);
+  --text-main: #e8f1ff;
+  --text-muted: #9fc2ee;
+  --accent: #ffffff;
+  --complete-color: #7cffb2;
+  --group-fill: #0c3566;
+  --node-fill: #0d3d75;
+  --node-stroke: rgba(255, 255, 255, 0.6);
+  --dot-color: rgba(255, 255, 255, 0.22);
+  --kind-entry: #ffffff; --kind-agent: #ffe08a; --kind-service: #b9d4ff; --kind-store: #9cf0d0;
+  --kind-external: #8fe3ff; --kind-model: #ffb3d9; --kind-cron: #ffc58a; --kind-tool: #d4f58f;
+  --kind-queue: #e3b8ff; --kind-gateway: #8ff0e0; --kind-client: #cfe3ff; --kind-cache: #fff3a0;
+  --kind-function: #ffb0b8; --kind-user: #ffffff; --kind-monitor: #c6caff; --kind-security: #ff9a9a;
+}
+
+/* @theme terminal | Terminal Green */
+[data-theme="terminal"] {
+  --font-sans: 'Space Mono', 'Courier New', monospace;
+  --bg-color: #000000;
+  --surface-color: rgba(0, 8, 2, 0.92);
+  --border-color: #0f5a22;
+  --text-main: #33ff66;
+  --text-muted: #1fa341;
+  --accent: #33ff66;
+  --complete-color: #33ff66;
+  --group-fill: #020a04;
+  --node-fill: #04140a;
+  --node-stroke: #148a34;
+  --dot-color: rgba(51, 255, 102, 0.1);
+  --kind-entry: #33ff66; --kind-agent: #ffb000; --kind-service: #66ffcc; --kind-store: #99ff33;
+  --kind-external: #33ccff; --kind-model: #ff66cc; --kind-cron: #ff9933; --kind-tool: #ccff66;
+  --kind-queue: #ff77ff; --kind-gateway: #44ffee; --kind-client: #77ccff; --kind-cache: #ffee33;
+  --kind-function: #ff7777; --kind-user: #d6ffe0; --kind-monitor: #99aaff; --kind-security: #ff5555;
+}
+
+/* @theme high_contrast | High Contrast */
+[data-theme="high_contrast"] {
+  --bg-color: #000000;
+  --surface-color: rgba(0, 0, 0, 0.96);
+  --border-color: #ffffff;
+  --text-main: #ffffff;
+  --text-muted: #d0d0d0;
+  --accent: #ffd400;
+  --complete-color: #00ff7f;
+  --group-fill: #000000;
+  --node-fill: #000000;
+  --node-stroke: #ffffff;
+  --dot-color: rgba(255, 255, 255, 0.18);
+  --kind-entry: #4da3ff; --kind-agent: #ffd400; --kind-service: #c792ff; --kind-store: #00ff7f;
+  --kind-external: #00e5ff; --kind-model: #ff5fb8; --kind-cron: #ff9f1a; --kind-tool: #b6ff3a;
+}
+
+/* --------------------------------------------------------------- light */
+
+/* Shared darker kind palette for light backgrounds */
+[data-theme="minimal_light"], [data-theme="solarized_light"], [data-theme="paper"], [data-theme="cyberpunk"] {
+  --kind-entry: #2563eb; --kind-agent: #b45309; --kind-service: #7c3aed; --kind-store: #059669;
+  --kind-external: #0891b2; --kind-model: #db2777; --kind-cron: #ea580c; --kind-tool: #4d7c0f;
+  --kind-queue: #a21caf; --kind-gateway: #0f766e; --kind-client: #0284c7; --kind-cache: #a16207;
+  --kind-function: #e11d48; --kind-user: #475569; --kind-monitor: #4f46e5; --kind-security: #b91c1c;
+  --kind-default: #6b7280;
+  --logo-filter: invert(1);   /* white simpleicons logos -> black */
+}
+
+/* @theme minimal_light | Minimal Light */
+[data-theme="minimal_light"] {
+  --bg-color: #f4f4f2;
+  --surface-color: rgba(255, 255, 255, 0.88);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --text-main: #111111;
+  --text-muted: #666666;
+  --accent: #111111;
+  --complete-color: #10b981;
+  --group-fill: #ebebe8;
+  --node-fill: #ffffff;
+  --node-stroke: rgba(0, 0, 0, 0.16);
+  --dot-color: rgba(0, 0, 0, 0.09);
+}
+
+/* @theme solarized_light | Solarized Light */
+[data-theme="solarized_light"] {
+  --bg-color: #fdf6e3;
+  --surface-color: rgba(253, 246, 227, 0.94);
+  --border-color: #d8cfb4;
+  --text-main: #586e75;
+  --text-muted: #5c7176;
+  --accent: #cb4b16;
+  --complete-color: #859900;
+  --group-fill: #f5eed6;
+  --node-fill: #fffcf0;
+  --node-stroke: #cfc6a8;
+  --dot-color: rgba(88, 110, 117, 0.12);
+  --kind-entry: #268bd2; --kind-agent: #b58900; --kind-service: #6c71c4; --kind-store: #859900;
+  --kind-external: #2aa198; --kind-model: #d33682; --kind-cron: #cb4b16; --kind-tool: #5f8a1e;
+}
+
+/* @theme paper | Paper (print-friendly) */
+[data-theme="paper"] {
+  --font-sans: Georgia, 'Times New Roman', serif;
+  --bg-color: #fbfaf7;
+  --surface-color: rgba(251, 250, 247, 0.94);
+  --border-color: #d9d6cc;
+  --text-main: #1f1f1f;
+  --text-muted: #6b6860;
+  --accent: #b3261e;
+  --complete-color: #2e7d32;
+  --group-fill: #f3f1ea;
+  --node-fill: #ffffff;
+  --node-stroke: #bdb9ab;
+  --dot-color: rgba(0, 0, 0, 0.07);
+  --kind-entry: #1d4e89; --kind-agent: #b7791f; --kind-service: #5b3f8c; --kind-store: #2f6f4f;
+  --kind-external: #1b7f8c; --kind-model: #a1306b; --kind-cron: #b4531a; --kind-tool: #5c7a1f;
+}
+
+/* @theme cyberpunk | Cyberpunk 2077 */
+[data-theme="cyberpunk"] {
+  --bg-color: #fce300;
+  --surface-color: rgba(252, 227, 0, 0.94);
+  --border-color: #000000;
+  --text-main: #000000;
+  --text-muted: #333333;
+  --accent: #ff003c;
+  --complete-color: #00f0ff;
+  --group-fill: #f2d900;
+  --node-fill: #fff7a8;
+  --node-stroke: #000000;
+  --dot-color: rgba(0, 0, 0, 0.14);
+}
 
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    ::selection {
-      background: var(--accent);
-      color: var(--bg-color);
-    }
+    ::selection { background: var(--accent); color: var(--bg-color); }
 
     body {
       background-color: var(--bg-color);
@@ -148,60 +443,35 @@
       transition: background-color 0.5s var(--ease-smooth), color 0.5s var(--ease-smooth);
     }
 
-    /* Ambient animated background glows */
+    /* Ambient background glows */
+    .bg-glow, .bg-glow-2 { position: absolute; border-radius: 50%; z-index: 0; pointer-events: none; }
     .bg-glow {
-      position: absolute;
-      width: 60vw;
-      height: 60vw;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(0,0,0,0) 70%);
-      top: -30vh;
-      left: -20vw;
-      z-index: 0;
-      pointer-events: none;
+      width: 60vw; height: 60vw; top: -30vh; left: -20vw;
+      background: radial-gradient(circle, var(--phase-1) 0%, transparent 70%);
+      opacity: 0.09;
       animation: float 20s ease-in-out infinite alternate;
     }
-    
     .bg-glow-2 {
-      position: absolute;
-      width: 50vw;
-      height: 50vw;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, rgba(0,0,0,0) 70%);
-      bottom: -20vh;
-      right: -10vw;
-      z-index: 0;
-      pointer-events: none;
+      width: 50vw; height: 50vw; bottom: -20vh; right: -10vw;
+      background: radial-gradient(circle, var(--phase-2) 0%, transparent 70%);
+      opacity: 0.07;
       animation: float-rev 25s ease-in-out infinite alternate;
     }
+    @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(10vw, 10vh); } }
+    @keyframes float-rev { 0% { transform: translate(0, 0); } 100% { transform: translate(-10vw, -15vh); } }
 
-    @keyframes float {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(10vw, 10vh); }
-    }
-    @keyframes float-rev {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(-10vw, -15vh); }
-    }
-
-    /* Main Area */
+    /* ---- Main area ---- */
     #main-container {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      inset: 0;
       z-index: 1;
       overflow: auto;
       padding: 60px;
-      padding-left: max(60px, 340px);
+      padding-left: 100px;
+      transition: padding-left 0.7s var(--ease-smooth);
     }
-    
-    #phases-viewport {
-      transform-origin: top left;
-      transition: transform 0.4s var(--ease-smooth);
-    }
-
+    #main-container.sidebar-open { padding-left: 380px; }
+    #phases-viewport { transform-origin: top left; transition: transform 0.4s var(--ease-smooth); }
     .phases-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -209,7 +479,6 @@
       padding-bottom: 80px;
     }
 
-    /* Glassmorphic Phase Cards */
     .phase-card {
       background: var(--surface-color);
       backdrop-filter: blur(20px);
@@ -218,38 +487,28 @@
       border-radius: 16px;
       padding: 28px;
       position: relative;
-      transition: all 0.5s var(--ease-smooth);
+      transition: border-color 0.4s var(--ease-smooth), box-shadow 0.4s var(--ease-smooth), translate 0.4s var(--ease-smooth);
       display: flex;
       flex-direction: column;
-      opacity: 0;
-      transform: translateY(40px);
-      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.35);
     }
-    
-    .phase-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7);
-      border-color: rgba(255,255,255,0.15);
-    }
-    
+    /* Initial hidden state; removed once the entry animation has run */
+    .phase-card.pre { opacity: 0; transform: translateY(40px); }
+    .phase-card:hover { translate: 0 -5px; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.45); border-color: var(--phase-color, var(--text-muted)); }
     .phase-card::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 2px;
       background: linear-gradient(90deg, transparent, var(--phase-color, var(--text-muted)), transparent);
-      opacity: 0.5;
+      opacity: 0.6;
       border-radius: 16px 16px 0 0;
     }
-
-    .phase-card.completed {
-      box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.15);
-    }
+    .phase-card.completed { box-shadow: 0 0 40px -10px var(--complete-color); }
 
     .complete-badge {
       position: absolute;
-      top: -12px;
-      right: 24px;
+      top: -12px; right: 24px;
       font-family: var(--font-mono);
       font-size: 11px;
       font-weight: 700;
@@ -258,131 +517,64 @@
       padding: 4px 12px;
       border-radius: 20px;
       opacity: 0;
-      transform: scale(0);
       box-shadow: 0 0 15px var(--complete-color);
+      pointer-events: none;
     }
-    
-    .phase-card.completed .complete-badge {
-      opacity: 1;
-    }
+    .phase-card.completed .complete-badge { opacity: 1; }
 
-    .phase-num {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      color: var(--phase-color, var(--text-muted));
-      margin-bottom: 8px;
-      letter-spacing: 1.5px;
-      font-weight: 700;
-    }
+    .phase-num { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--phase-color, var(--text-muted)); margin-bottom: 8px; letter-spacing: 1.5px; font-weight: 700; }
+    .phase-title { font-weight: 600; font-size: 18px; margin-bottom: 8px; letter-spacing: -0.02em; }
+    .phase-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
 
-    .phase-title {
-      font-weight: 600;
-      font-size: 18px;
-      margin-bottom: 8px;
-      letter-spacing: -0.02em;
-    }
+    .mini-progress-bg { height: 4px; background: var(--track-bg); border-radius: 2px; overflow: hidden; margin-bottom: 24px; }
+    .mini-progress-fill { height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 10px var(--phase-color); }
 
-    .phase-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .mini-progress-bg {
-      height: 4px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-    .mini-progress-fill {
-      height: 100%;
-      width: 0%;
-      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-      box-shadow: 0 0 10px var(--phase-color);
-    }
-
-    .task-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 8px;
-      transition: background 0.3s;
-      margin: -8px;
-    }
-    .task-item:hover {
-      background: rgba(255,255,255,0.03);
-    }
-    .task-item:hover .task-label {
-      color: var(--accent);
-    }
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .task-item { display: flex; align-items: flex-start; gap: 12px; padding: 8px; border-radius: 8px; transition: background 0.3s; margin: -8px; }
+    .task-item:hover { background: var(--hover-bg); }
+    .task-item:hover .task-label { color: var(--accent); }
+    .task-body { min-width: 0; flex: 1; }
 
     .custom-checkbox {
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border: 1.5px solid var(--text-muted);
       border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       margin-top: 2px;
+      cursor: pointer;
       transition: all 0.3s var(--ease-smooth);
     }
-    
-    .custom-checkbox svg {
-      width: 12px;
-      height: 12px;
-      fill: none;
-      stroke: var(--bg-color);
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      opacity: 0;
-      transform: scale(0.5);
-      transition: all 0.3s var(--ease-smooth);
-    }
+    .custom-checkbox svg { width: 12px; height: 12px; fill: none; stroke: var(--bg-color); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transform: scale(0.5); transition: all 0.3s var(--ease-smooth); }
+    .task-item.checked .custom-checkbox { border-color: currentColor; background: currentColor; box-shadow: 0 0 10px currentColor; }
+    .task-item.checked .custom-checkbox svg { opacity: 1; transform: scale(1); }
+    .task-item.checked .task-label { text-decoration: line-through; opacity: 0.35; }
+    body.hide-done .task-item.checked { display: none; }
 
-    .task-item.checked .custom-checkbox {
-      border-color: currentColor;
-      background: currentColor;
-      box-shadow: 0 0 10px currentColor;
+    .task-label { font-size: 13px; transition: color 0.3s; line-height: 1.4; font-weight: 500; cursor: pointer; }
+    .task-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .chip {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      line-height: 1;
+      padding: 3px 7px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      white-space: nowrap;
     }
-    .task-item.checked .custom-checkbox svg {
-      opacity: 1;
-      transform: scale(1);
-    }
-    .task-item.checked .task-label {
-      text-decoration: line-through;
-      opacity: 0.3;
-    }
+    .chip.pri-high { color: var(--kind-security); border-color: var(--kind-security); }
+    .chip.pri-med  { color: var(--kind-agent); border-color: var(--kind-agent); }
+    .chip.pri-low  { color: var(--kind-entry); border-color: var(--kind-entry); }
+    .task-item.checked .task-meta { opacity: 0.4; }
 
-    .task-label {
-      font-size: 13px;
-      transition: all 0.3s;
-      line-height: 1.4;
-      font-weight: 500;
-    }
-
-    /* Sidebar UI */
+    /* ---- Sidebar ---- */
     #sidebar {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 320px;
       height: 100vh;
-      background: rgba(10, 10, 12, 0.7);
+      background: var(--surface-color);
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
       border-right: 1px solid var(--border-color);
@@ -392,92 +584,54 @@
       transform: translateX(-100%);
       transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    #sidebar.open {
-      transform: translateX(0);
-    }
+    #sidebar.open { transform: translateX(0); }
 
     #sidebar-toggle {
       position: fixed;
-      top: 24px;
-      left: 24px;
-      width: 44px;
-      height: 44px;
+      top: 24px; left: 24px;
+      width: 44px; height: 44px;
       border-radius: 12px;
       background: var(--surface-color);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       z-index: 20;
       backdrop-filter: blur(12px);
       transition: all 0.3s var(--ease-smooth);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    #sidebar-toggle:hover {
-      background: rgba(255,255,255,0.05);
-      transform: scale(1.05);
-    }
-    #sidebar-toggle svg {
-      width: 22px;
-      height: 22px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-    #sidebar.open ~ #sidebar-toggle {
-      left: 340px;
-    }
+    #sidebar-toggle:hover { background: var(--hover-bg); transform: scale(1.05); }
+    #sidebar-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    #sidebar.open ~ #sidebar-toggle { left: 340px; }
 
-    .sidebar-header {
-      padding: 60px 28px 28px 28px;
-      border-bottom: 1px solid var(--border-color);
+    .sidebar-header { padding: 60px 28px 28px 28px; border-bottom: 1px solid var(--border-color); }
+    .project-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.03em; }
+    .project-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+    .overall-progress-bar { height: 4px; background: var(--track-bg); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+    .overall-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--phase-1), var(--complete-color)); transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 0 10px var(--complete-color); }
+    .overall-progress-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-align: right; }
+    .next-up {
+      margin-top: 14px;
+      width: 100%;
+      text-align: left;
+      background: var(--hover-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
     }
-    .project-name {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: -0.03em;
-    }
-    .project-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
-    
-    .overall-progress-bar {
-      height: 4px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .overall-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #3b82f6, #10b981);
-      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-      box-shadow: 0 0 10px #10b981;
-    }
-    .overall-progress-label {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: right;
-    }
+    .next-up small { display: block; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 2px; }
+    .next-up:hover { border-color: var(--accent); }
 
-    .tabs {
-      display: flex;
-      padding: 0 28px;
-      margin-top: -18px;
-    }
+    .tabs { display: flex; padding: 0 28px; margin-top: -18px; }
     .tab-btn {
       flex: 1;
-      background: rgba(0,0,0,0.3);
+      background: var(--bg-color);
       border: 1px solid var(--border-color);
       color: var(--text-muted);
       padding: 10px 0;
@@ -487,136 +641,61 @@
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s var(--ease-smooth);
-      backdrop-filter: blur(10px);
     }
-    .tab-btn:first-child {
-      border-radius: 20px 0 0 20px;
-      border-right: none;
-    }
-    .tab-btn:last-child {
-      border-radius: 0 20px 20px 0;
-    }
-    .tab-btn.active {
-      background: rgba(255,255,255,0.08);
-      color: var(--text-main);
-      box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
-    }
+    .tab-btn:first-child { border-radius: 20px 0 0 20px; border-right: none; }
+    .tab-btn:last-child { border-radius: 0 20px 20px 0; }
+    .tab-btn.active { background: var(--border-color); color: var(--text-main); }
 
-    .tab-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 28px;
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content { flex: 1; overflow-y: auto; padding: 28px; display: none; }
+    .tab-content.active { display: block; }
 
-    .sidebar-phase {
-      margin-bottom: 16px;
-    }
-    .sidebar-phase-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.3s;
-      font-weight: 600;
-    }
-    .sidebar-phase-header:hover {
-      opacity: 1;
-    }
-    .sidebar-phase-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      box-shadow: 0 0 8px currentColor;
-    }
-    .sidebar-phase-title {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .sidebar-phase-fraction {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .sidebar-tasks {
-      margin-top: 12px;
-      padding-left: 22px;
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .sidebar-phase.expanded .sidebar-tasks {
-      display: flex;
-    }
-    
-    .sidebar-task-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      cursor: pointer;
-      transition: opacity 0.3s;
-    }
-    .sidebar-task-item:hover .task-label {
-      color: var(--accent);
-    }
-    .sidebar-task-item.checked .task-label {
-      text-decoration: line-through;
-      opacity: 0.3;
-    }
+    .sidebar-phase { margin-bottom: 16px; }
+    .sidebar-phase-header { display: flex; align-items: center; gap: 12px; font-size: 13px; cursor: pointer; opacity: 0.85; transition: opacity 0.3s; font-weight: 600; }
+    .sidebar-phase-header:hover { opacity: 1; }
+    .sidebar-phase-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; flex-shrink: 0; }
+    .sidebar-phase-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-phase-fraction { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+    .sidebar-tasks { margin-top: 12px; padding-left: 22px; display: none; flex-direction: column; gap: 12px; }
+    .sidebar-phase.expanded .sidebar-tasks { display: flex; }
+    .sidebar-task-item { display: flex; align-items: flex-start; gap: 10px; }
+    .sidebar-task-item .task-label { font-size: 12px; }
+    .sidebar-task-item:hover .task-label { color: var(--accent); }
 
-    /* Notes Tab */
-    .notes-header {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--accent);
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 12px;
-    }
+    /* Notes tab */
+    .notes-header { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--accent); }
+    .notes-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color); }
     .notes-content {
-      font-family: var(--font-mono);
       font-size: 13px;
-      line-height: 1.8;
+      line-height: 1.7;
       color: var(--text-main);
-      background: rgba(0,0,0,0.2);
+      background: var(--hover-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px 20px;
       margin-bottom: 24px;
-      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
+    .notes-content p { margin: 0; }
+    .notes-content .gap { height: 10px; }
+    .notes-content ul { margin: 4px 0 4px 18px; }
+    .notes-content code { font-family: var(--font-mono); font-size: 12px; background: var(--track-bg); padding: 1px 5px; border-radius: 4px; }
     .notes-tip {
-      background: rgba(245, 158, 11, 0.1);
-      border-left: 4px solid #f59e0b;
-      color: #fbbf24;
+      background: var(--hover-bg);
+      border-left: 4px solid var(--kind-agent);
+      color: var(--text-main);
       font-style: italic;
       font-size: 12.5px;
-      padding: 16px 20px;
+      padding: 14px 18px;
       border-radius: 0 8px 8px 0;
       line-height: 1.6;
     }
-    .empty-notes {
-      font-size: 13px;
-      color: var(--text-muted);
-      text-align: center;
-      margin-top: 60px;
-      font-style: italic;
-    }
+    .notes-tip b { display: block; font-style: normal; font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--kind-agent); margin-bottom: 4px; }
+    .empty-notes { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 60px; font-style: italic; }
 
-    .sidebar-footer {
-      padding: 20px 28px;
-      border-top: 1px solid var(--border-color);
-    }
+    .sidebar-footer { padding: 18px 28px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
     .theme-select {
       width: 100%;
-      background: rgba(0,0,0,0.3);
+      background: var(--bg-color);
       color: var(--text-main);
       border: 1px solid var(--border-color);
       padding: 10px 12px;
@@ -626,43 +705,51 @@
       font-weight: 500;
       outline: none;
       cursor: pointer;
-      backdrop-filter: blur(10px);
     }
+    .footer-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-muted); }
+    .footer-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .btn-small {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-small:hover { color: var(--text-main); background: var(--hover-bg); }
 
-    /* Zoom Controls */
-    #zoom-controls {
-      position: fixed;
-      bottom: 32px;
-      right: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 10;
-    }
+    #zoom-controls { position: fixed; bottom: 32px; right: 32px; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
     .zoom-btn {
-      width: 44px;
-      height: 44px;
+      width: 44px; height: 44px;
       border-radius: 12px;
       background: var(--surface-color);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
       backdrop-filter: blur(12px);
       transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    .zoom-btn:hover {
-      background: rgba(255,255,255,0.05);
-      transform: scale(1.05);
-    }
+    .zoom-btn:hover { background: var(--hover-bg); transform: scale(1.05); }
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bg-glow, .bg-glow-2 { animation: none; }
+      * { transition-duration: 0.01ms !important; }
+    }
+    @media (max-width: 760px) {
+      #main-container, #main-container.sidebar-open { padding: 76px 18px 18px 18px; }
+      #sidebar { width: min(320px, 88vw); }
+      #sidebar.open ~ #sidebar-toggle { left: calc(min(320px, 88vw) + 12px); }
+    }
   </style>
 </head>
 <body data-theme="dark_neon">
@@ -676,343 +763,393 @@
     </div>
   </div>
 
-  <button id="sidebar-toggle" onclick="toggleSidebar()">
-    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
-  </button>
-
   <div id="sidebar" class="open">
     <div class="sidebar-header">
       <div class="project-name">Stripe-Managed SaaS Uber — MVP Build</div>
       <div class="project-desc">Ride-sharing platform with Stripe Connect, real-time tracking, and multi-region support</div>
-      <div class="overall-progress-bar">
-        <div class="overall-progress-fill" id="overall-progress-fill"></div>
-      </div>
+      <div class="overall-progress-bar"><div class="overall-progress-fill" id="overall-progress-fill"></div></div>
       <div class="overall-progress-label" id="overall-progress-label">0 / 0 tasks</div>
+      <button class="next-up" id="next-up"><small>Next up</small><span id="next-up-title"></span></button>
     </div>
-    
+
     <div style="height: 24px;"></div>
-    
+
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('tasks')">Tasks</button>
-      <button class="tab-btn" onclick="switchTab('notes')">Notes</button>
+      <button class="tab-btn active" data-tab="tasks">Tasks</button>
+      <button class="tab-btn" data-tab="notes">Notes</button>
     </div>
 
     <div id="tab-tasks" class="tab-content active"></div>
     <div id="tab-notes" class="tab-content">
       <div id="notes-container" style="display: none;">
-        <div class="notes-header" id="notes-task-title">Task Title</div>
-        <div class="notes-content" id="notes-content-text">Task details...</div>
-        <div class="notes-tip" id="notes-phase-tip">Phase tip...</div>
+        <div class="notes-header" id="notes-task-title"></div>
+        <div class="notes-meta" id="notes-meta"></div>
+        <div class="notes-content" id="notes-content-text"></div>
+        <div class="notes-tip" id="notes-phase-tip"><b>Phase tip</b><span></span></div>
       </div>
-      <div class="empty-notes" id="notes-empty">
-        Click on any task to view its detailed notes.
-      </div>
+      <div class="empty-notes" id="notes-empty">Click on any task to view its detailed notes.</div>
     </div>
 
     <div class="sidebar-footer">
-      <select class="theme-select" onchange="changeTheme(this.value)">
-        <option value="dark_neon">Awwwards Dark (Neon)</option>
-        <option value="rdr2_gritty">RDR2 Gritty</option>
-        <option value="minimal_light">Glass Light</option>
-
-        <option value="cyberpunk">Cyberpunk 2077</option>
-        <option value="dracula">Dracula</option>
-        <option value="synthwave">Synthwave 84</option>
-        <option value="nord">Nord</option>
-        <option value="gruvbox">Gruvbox Dark</option>
-        <option value="solarized_dark">Solarized Dark</option>
-        <option value="monokai">Monokai</option>
-
-      </select>
+      <select class="theme-select" id="theme-select" aria-label="Theme"></select>
+      <div class="footer-row">
+        <label><input type="checkbox" id="hide-done"> Hide completed</label>
+        <button class="btn-small" id="reset-progress">Reset progress</button>
+      </div>
     </div>
   </div>
 
+  <button id="sidebar-toggle" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+  </button>
+
   <div id="zoom-controls">
-    <button class="zoom-btn" onclick="zoom(0.2)">
+    <button class="zoom-btn" id="zoom-in" aria-label="Zoom in">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
-    <button class="zoom-btn" onclick="resetZoom()">
+    <button class="zoom-btn" id="zoom-reset" aria-label="Reset zoom">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="2"></circle></svg>
     </button>
-    <button class="zoom-btn" onclick="zoom(-0.2)">
+    <button class="zoom-btn" id="zoom-out" aria-label="Zoom out">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
   </div>
 
   <script>
-    // Injected Data
-    let DATA;
-    if (typeof {"project": {"name": "Stripe-Managed SaaS Uber — MVP Build", "description": "Ride-sharing platform with Stripe Connect, real-time tracking, and multi-region support", "theme": "dark_neon"}, "phases": [{"id": "phase-1-infrastructure", "title": "Phase 1: Core Infrastructure & Multi-Region Data Architecture", "description": "Establish highly available relational storage with PostGIS extensions, distributed Redis caching, and centralized secret management for the platform.", "tip": "Prioritize database schema normalization and spatial indexing from day one to avoid costly table migrations when scaling geospatial queries across high-density urban areas. Implement connection pooling using PgBouncer early to prevent ephemeral port exhaustion under heavy concurrent connection spikes. Ensure Redis persistence is configured with both RDB snapshots and AOF (append-only file) with appendfsync everysec to guard against data loss during unexpected broker restarts.", "tasks": [{"id": "postgres-schema", "title": "PostgreSQL Schema & PostGIS Spatial Extensions", "note": "Design the core relational data model in PostgreSQL 16 leveraging PostGIS spatial extensions for fast geographic distance computations and bounding box queries. Key tables must include 'users' (id, role, phone_e164, email, status, created_at), 'driver_profiles' (user_id, license_number, vehicle_type, rating, stripe_account_id, is_active, is_verified), 'trips' (id, rider_id, driver_id, status, pickup_location GEOMETRY(Point, 4326), dropoff_location GEOMETRY(Point, 4326), fare_cents, surge_multiplier, route_polyline, initiated_at, completed_at), and 'ledger_entries' for double-entry accounting. Create spatial GiST indexes on pickup_location and dropoff_location columns to accelerate ST_DWithin and ST_DistanceSphere queries. Implement strict UUIDv7 primary keys for time-ordered clustering, foreign key constraints with ON DELETE RESTRICT on financial records, and table partitioning by month on the trips table to preserve query latency as transaction volumes scale."}, {"id": "redis-setup", "title": "Redis Cluster & Geospatial Cache Layer", "note": "Deploy a low-latency Redis 7.2 cluster configured for geospatial driver tracking, ephemeral session caching, and rate limiting. Utilize Redis GEO commands (GEOADD, GEORADIUS, and GEOSEARCH) to maintain live driver coordinate sets partitioned by geographic geohash or city-level cluster keys. Set up memory eviction policies using volatile-lru with dedicated database instances to separate volatile session tokens from critical driver presence indexes. Implement connection pooling via redis-py or ioredis with automated reconnection backoff, exponential jitter, and health-check ping intervals. Configure Redis Pub/Sub channels for broadcasting ride status state transitions and driver proximity dispatch pings to connected gateway workers."}, {"id": "environment-config", "title": "Centralized Environment Configuration & Secret Management", "note": "Establish an environment isolation pipeline supporting local, staging, and production tiers with zero hardcoded credentials. Implement strict schema validation using Pydantic Settings or Dotenv-vault to enforce presence and type correctness for all runtime secrets including TWILIO_AUTH_TOKEN, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, DATABASE_URL, and REDIS_URL. Integrate AWS Secrets Manager or HashiCorp Vault for dynamic secret rotation and audit logging of cryptographic keys. Configure Docker Compose orchestration files with health checks for PostgreSQL and Redis to standardize developer onboarding and local testing environments. Ensure production builds enforce TLS 1.3 encryption across all database and caching connection strings with automated SSL certificate validation."}]}, {"id": "phase-2-auth-onboarding", "title": "Phase 2: Authentication, Authorization & Driver Onboarding", "description": "Build secure passwordless phone authentication with Twilio OTP, stateless JWT session middleware, and automated driver KYC document verification pipelines.", "tip": "Enforce strict rate limiting per phone number and IP on all OTP initiation endpoints to mitigate SMS toll fraud and bot exhaustion attacks. Isolate rider and driver role claims within cryptographically signed JWT payloads to prevent privilege escalation at the API gateway layer. Use presigned S3/GCS upload URLs with expiring signatures for driver identity documents so sensitive PII never traverses application server memory unencrypted.", "tasks": [{"id": "otp-twilio", "title": "Passwordless Phone Authentication with Twilio Verify", "note": "Develop passwordless authentication endpoints POST /api/v1/auth/otp/send and POST /api/v1/auth/otp/verify using the Twilio Verify v2 REST API. Enforce E.164 phone number formatting via Google's libphonenumber library before dispatching 6-digit numeric verification codes. Implement a sliding window rate limiter in Redis allowing a maximum of 3 OTP requests per phone number every 10 minutes and 10 requests per IP address per hour to stop SMS pumping exploits. Handle edge cases such as invalid country codes, carrier lookup failures, expired tokens (10-minute TTL), and max-retry verification lockouts. On successful verification, upsert the user record in PostgreSQL and return an initial authentication payload containing user ID, role, and onboarding completion status."}, {"id": "jwt-middleware", "title": "Stateless JWT Authentication & Role-Based Access Control", "note": "Implement asymmetric RS256 or Ed25519 JWT token generation with dual-token architecture consisting of short-lived access tokens (15-minute expiration) and rotating refresh tokens (30-day expiration stored in HTTP-only, Secure, SameSite=Strict cookies). Build middleware guards to inspect Authorization Bearer headers, decode claims (sub, role, device_id, iss, exp), and inject verified user contexts into downstream handler scopes. Store cryptographic token revocation fingerprints in a Redis blacklist with TTL matching the remaining token lifetime for immediate session invalidation upon logout. Enforce granular Role-Based Access Control (RBAC) across rider, driver, and platform admin endpoints with dedicated permission decorators. Implement automated refresh flow via POST /api/v1/auth/refresh with token reuse detection to trigger instant family revocation if a compromised refresh token is replayed."}, {"id": "driver-document-verification", "title": "Driver KYC & Document Upload Verification Pipeline", "note": "Create the driver onboarding workflow with endpoints POST /api/v1/drivers/documents/presigned-url and POST /api/v1/drivers/documents/submit for driver license, vehicle registration, and commercial insurance uploads. Generate pre-signed S3 upload URLs with client-side SHA-256 checksum validation and a strict 5-minute expiry to keep uploads direct and secure. Store document metadata, expiration dates, OCR text extraction results, and verification statuses (PENDING, APPROVED, REJECTED, EXPIRED) in the 'driver_documents' table. Integrate asynchronous webhook triggers with automated KYC providers (e.g., Persona or Stripe Identity) to verify driver identity and driving history against government databases. Handle edge cases such as blurry image rejections, mismatched document names, and automated expiration warnings dispatched 30 days prior to driver license lapse."}]}, {"id": "phase-3-ride-matching-engine", "title": "Phase 3: High-Concurrency Ride Matching & Dynamic Pricing Engine", "description": "Implement geospatial indexing for active drivers, atomic ride request queueing with lockouts and timeouts, and multi-variable dynamic fare calculation algorithms.", "tip": "Use Redis distributed locks (Redlock or SETNX with UUID owner tokens) during driver assignment to guarantee that a single driver cannot be concurrently dispatched to multiple simultaneous trip requests. Calibrate geospatial search radius expansions in tiered batches (e.g., 1km, 3km, 5km) to balance dispatch latency against network roundtrips. Ensure the fare calculation engine calculates and locks upfront price guarantees with cryptographic nonces to prevent rider disputes caused by transient surge fluctuations.", "tasks": [{"id": "redis-geospatial-driver-index", "title": "Redis Geospatial Driver Presence Index & Heartbeat Engine", "note": "Build high-frequency driver location ingestion endpoints via WebSocket and POST /api/v1/drivers/location executing Redis GEOADD operations on spatial keys ('drivers:available:<city_id>'). Maintain driver state machines (OFFLINE, AVAILABLE, EN_ROUTE_PICKUP, ON_TRIP) in Redis hashes with TTL-backed heartbeat keys that automatically mark drivers OFFLINE if no ping is received within 15 seconds. Implement spatial proximity queries using GEORADIUSBYMEMBER or GEOSEARCH with WITHDIST and WITHCOORD flags to return the top N nearest available drivers sorted by geodesic distance. Cluster spatial keys using H3 hexagonal hierarchical spatial indices or geohash prefixes to eliminate lock contention across distinct metropolitan dispatch zones. Handle edge cases such as rapid GPS drift, duplicate coordinate packets, and tunnel re-entry bursts using Kalman filter smoothing algorithms."}, {"id": "trip-request-queue", "title": "Atomic Trip Request Dispatch Queue & Driver Accept Timeout", "note": "Construct an asynchronous dispatch pipeline with POST /api/v1/trips/request which creates a TRIP_REQUESTED record and pushes the dispatch job to a BullMQ or Celery Redis queue. Implement an atomic driver-offering loop that reserves the nearest candidate driver using Redis SETNX with a 15-second expiration lease and pushes an interactive offer card to the driver's device. If the driver declines or the 15-second TTL expires without an ACCEPT response, release the lock, record the rejection in the dispatch audit log, and cascade the offer to the next closest driver in the spatial candidate list. Limit matching attempts to a maximum of 5 cascading driver iterations or a global 90-second timeout before updating the trip status to NO_DRIVERS_AVAILABLE and notifying the rider. Ensure transactional atomicity via PostgreSQL SELECT FOR UPDATE or Redis Lua scripts during the final trip confirmation transition to prevent race conditions."}, {"id": "fare-calculation", "title": "Dynamic Upfront Pricing, Surge Multiplier & ETA Estimation Engine", "note": "Develop the pricing calculation service at POST /api/v1/trips/estimate-fare utilizing OpenStreetMap/OSRM or Google Maps Distance Matrix APIs for accurate travel duration and route distance. Calculate base fares using the formula: Base Fare + (Estimated Minutes * Per-Minute Rate) + (Estimated Distance * Per-Mile Rate) + Airport/Toll Surcharges. Calculate dynamic surge multipliers in real-time by computing the ratio of active rider demand pings to available drivers within localized H3 hex cells over 5-minute rolling windows. Generate a signed fare token (HMAC-SHA256 containing trip parameters, estimated fare, surge tier, and timestamp) with a 5-minute validity window for the rider to accept. Handle edge cases such as sudden route recalculation, mid-trip destination changes, and minimum cancellation fee rules enforced when a rider cancels 2+ minutes after driver acceptance."}]}, {"id": "phase-4-stripe-payments", "title": "Phase 4: Stripe Connect Escrow, Payouts & Resilient Webhooks", "description": "Architect multi-party marketplace payments using Stripe Connect Custom/Express accounts, two-step authorization holds and captures, and idempotent webhook handlers.", "tip": "Always execute payment authorization holds at the moment of ride booking and only capture the final charge upon trip completion to account for tolls, tips, and route changes. Store all financial transactions in an immutable, append-only double-entry ledger table within PostgreSQL to simplify reconciliation against Stripe payout balances. Guard every incoming Stripe webhook against replay attacks by enforcing raw body cryptographic signature verification and database-backed idempotency event keys.", "tasks": [{"id": "stripe-connect-express", "title": "Stripe Connect Express Onboarding & Split Payment Configuration", "note": "Integrate the Stripe Connect API to provision Express or Custom connected accounts for drivers via POST /api/v1/drivers/stripe/onboarding-link using the stripe.accountLinks.create SDK method. Store the resulting Stripe Account ID ('acct_xxx'), onboarding status, charges_enabled, and payouts_enabled flags in the driver profile table. Configure destination charges or separate charge and transfer architecture specifying the platform application fee percentage (e.g., 20% platform take-rate) and automated payout schedules. Implement endpoints for drivers to query their balance, payout history, and access the Stripe Express dashboard via single-sign-on login links (stripe.accounts.createLoginLink). Handle edge cases including onboarding drop-offs, country-specific KYC compliance requirements, and restricted capability webhooks (account.updated)."}, {"id": "payment-hold-capture", "title": "Two-Phase Payment Authorization Hold & Capture Lifecycle", "note": "Implement the complete ride payment lifecycle starting with a pre-authorization hold via stripe.paymentIntents.create with capture_method='manual' upon trip request confirmation. Attach customer PaymentMethods stored securely in Stripe Vault and pass the calculated upfront fare amount with setup_future_usage options for streamlined one-click rebooking. When the trip status transitions to COMPLETED, compute the final fare including actual mileage, wait-time fees, route tolls, and driver tips, then execute stripe.paymentIntents.capture with amount_to_capture. If the trip is cancelled before pickup within the grace period, call stripe.paymentIntents.cancel to release the held funds immediately and notify the rider. For non-grace cancellations, execute a partial capture corresponding to the standard platform cancellation fee."}, {"id": "webhook-handler-idempotency", "title": "Idempotent Stripe Webhook Ingestion & Financial Ledger Logging", "note": "Build the dedicated webhook listener endpoint POST /api/v1/payments/webhook configured with raw-body parsing to verify stripe-signature headers using stripe.Webhook.constructEvent. Handle critical asynchronous events including 'payment_intent.succeeded', 'payment_intent.payment_failed', 'charge.refunded', 'account.updated', and 'transfer.created'. Implement an idempotency guard using an 'idempotency_keys' database table with unique constraints on Stripe Event IDs to reject duplicate webhook deliveries gracefully with HTTP 200. On successful capture, write corresponding credit and debit entries to the immutable 'ledger_entries' table for rider charge, platform commission revenue, and driver payout liability. Implement retry mechanisms with dead-letter queue routing for downstream business logic failures during webhook handling."}]}, {"id": "phase-5-realtime-launch", "title": "Phase 5: Real-Time Telemetry, Push Notifications & Production Launch", "description": "Scale WebSocket telemetry for live map tracking, configure high-priority FCM push notifications for critical ride events, and execute the production readiness checklist.", "tip": "Throttling and batching driver telemetry updates at 1-2 Hz intervals prevents saturating client rendering threads and backend WebSocket servers while maintaining smooth vehicle animation on maps. Implement exponential reconnection backoffs with heartbeat pings on mobile WebSocket connections to gracefully recover from cellular handoffs between Wi-Fi and 5G towers. Conduct end-to-end chaos engineering tests against simulated database failovers, Redis network partitions, and third-party payment gateway latency prior to launch.", "tasks": [{"id": "websocket-location-streaming", "title": "WebSocket Telemetry & Live Map Route Interpolation", "note": "Deploy high-throughput WebSocket gateway endpoints at /ws/v1/tracking authenticated via handshake query token validation. Connect WebSocket worker nodes to Redis Pub/Sub channels keyed by trip ID ('trips:tracking:<trip_id>') to broadcast driver location updates to connected rider apps with sub-100ms latency. Throttle location transmissions from driver devices to 1 Hz, embedding GPS coordinates, compass bearing, vehicle speed, and accuracy radius within the payload. Implement client-side linear interpolation (lerp) and bezier spline smoothing on Mapbox/Google Maps SDKs to render smooth vehicle movement between GPS update intervals. Handle abrupt socket disconnects, automatic session resumption via message sequence IDs, and channel cleanup upon trip completion."}, {"id": "fcm-push-notifications", "title": "Firebase Cloud Messaging (FCM) & Apple APNs Push Dispatcher", "note": "Integrate the Firebase Admin SDK to deliver low-latency, high-priority push notifications and Apple Push Notification service (APNs) VoIP/Live Activity pings. Create the background notification worker listening to trip state transitions to dispatch alerts for DRIVER_ASSIGNED, DRIVER_ARRIVED, TRIP_STARTED, and RECEIPT_READY. Manage multi-device user device tokens in a 'device_tokens' table with automated invalidation when FCM returns 'messaging/registration-token-not-registered'. Configure notification channels on Android 8.0+ and APNs alert payloads with custom sound files, action buttons (e.g., 'Call Driver', 'Cancel Ride'), and high-priority flags for urgent dispatch alerts. Handle offline delivery fallback, localized notification templates in multiple languages, and badge count synchronizations across devices."}, {"id": "production-deployment-checklist", "title": "Production Hardening, Load Testing & Launch Readiness", "note": "Execute the comprehensive production readiness checklist across cloud infrastructure, security, monitoring, and compliance. Deploy containerized microservices to Kubernetes (EKS/GKE) or AWS ECS with auto-scaling policies based on CPU utilization and active WebSocket connection counts. Conduct stress and load testing with k6 or Locust simulating 10,000 concurrent riders and 2,500 active drivers generating spatial queries and booking requests. Implement distributed tracing with OpenTelemetry, structured JSON logging with Datadog/ELK, and Prometheus/Grafana dashboards for real-time tracking of matching latency, payment failures, and API 5xx errors. Finalize security audits covering OWASP Top 10 vulnerabilities, PCI-DSS compliance verification for Stripe tokenization, automated database point-in-time backups, and a multi-region disaster recovery runbook."}]}]} !== 'undefined') {
-      DATA = {"project": {"name": "Stripe-Managed SaaS Uber — MVP Build", "description": "Ride-sharing platform with Stripe Connect, real-time tracking, and multi-region support", "theme": "dark_neon"}, "phases": [{"id": "phase-1-infrastructure", "title": "Phase 1: Core Infrastructure & Multi-Region Data Architecture", "description": "Establish highly available relational storage with PostGIS extensions, distributed Redis caching, and centralized secret management for the platform.", "tip": "Prioritize database schema normalization and spatial indexing from day one to avoid costly table migrations when scaling geospatial queries across high-density urban areas. Implement connection pooling using PgBouncer early to prevent ephemeral port exhaustion under heavy concurrent connection spikes. Ensure Redis persistence is configured with both RDB snapshots and AOF (append-only file) with appendfsync everysec to guard against data loss during unexpected broker restarts.", "tasks": [{"id": "postgres-schema", "title": "PostgreSQL Schema & PostGIS Spatial Extensions", "note": "Design the core relational data model in PostgreSQL 16 leveraging PostGIS spatial extensions for fast geographic distance computations and bounding box queries. Key tables must include 'users' (id, role, phone_e164, email, status, created_at), 'driver_profiles' (user_id, license_number, vehicle_type, rating, stripe_account_id, is_active, is_verified), 'trips' (id, rider_id, driver_id, status, pickup_location GEOMETRY(Point, 4326), dropoff_location GEOMETRY(Point, 4326), fare_cents, surge_multiplier, route_polyline, initiated_at, completed_at), and 'ledger_entries' for double-entry accounting. Create spatial GiST indexes on pickup_location and dropoff_location columns to accelerate ST_DWithin and ST_DistanceSphere queries. Implement strict UUIDv7 primary keys for time-ordered clustering, foreign key constraints with ON DELETE RESTRICT on financial records, and table partitioning by month on the trips table to preserve query latency as transaction volumes scale."}, {"id": "redis-setup", "title": "Redis Cluster & Geospatial Cache Layer", "note": "Deploy a low-latency Redis 7.2 cluster configured for geospatial driver tracking, ephemeral session caching, and rate limiting. Utilize Redis GEO commands (GEOADD, GEORADIUS, and GEOSEARCH) to maintain live driver coordinate sets partitioned by geographic geohash or city-level cluster keys. Set up memory eviction policies using volatile-lru with dedicated database instances to separate volatile session tokens from critical driver presence indexes. Implement connection pooling via redis-py or ioredis with automated reconnection backoff, exponential jitter, and health-check ping intervals. Configure Redis Pub/Sub channels for broadcasting ride status state transitions and driver proximity dispatch pings to connected gateway workers."}, {"id": "environment-config", "title": "Centralized Environment Configuration & Secret Management", "note": "Establish an environment isolation pipeline supporting local, staging, and production tiers with zero hardcoded credentials. Implement strict schema validation using Pydantic Settings or Dotenv-vault to enforce presence and type correctness for all runtime secrets including TWILIO_AUTH_TOKEN, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, DATABASE_URL, and REDIS_URL. Integrate AWS Secrets Manager or HashiCorp Vault for dynamic secret rotation and audit logging of cryptographic keys. Configure Docker Compose orchestration files with health checks for PostgreSQL and Redis to standardize developer onboarding and local testing environments. Ensure production builds enforce TLS 1.3 encryption across all database and caching connection strings with automated SSL certificate validation."}]}, {"id": "phase-2-auth-onboarding", "title": "Phase 2: Authentication, Authorization & Driver Onboarding", "description": "Build secure passwordless phone authentication with Twilio OTP, stateless JWT session middleware, and automated driver KYC document verification pipelines.", "tip": "Enforce strict rate limiting per phone number and IP on all OTP initiation endpoints to mitigate SMS toll fraud and bot exhaustion attacks. Isolate rider and driver role claims within cryptographically signed JWT payloads to prevent privilege escalation at the API gateway layer. Use presigned S3/GCS upload URLs with expiring signatures for driver identity documents so sensitive PII never traverses application server memory unencrypted.", "tasks": [{"id": "otp-twilio", "title": "Passwordless Phone Authentication with Twilio Verify", "note": "Develop passwordless authentication endpoints POST /api/v1/auth/otp/send and POST /api/v1/auth/otp/verify using the Twilio Verify v2 REST API. Enforce E.164 phone number formatting via Google's libphonenumber library before dispatching 6-digit numeric verification codes. Implement a sliding window rate limiter in Redis allowing a maximum of 3 OTP requests per phone number every 10 minutes and 10 requests per IP address per hour to stop SMS pumping exploits. Handle edge cases such as invalid country codes, carrier lookup failures, expired tokens (10-minute TTL), and max-retry verification lockouts. On successful verification, upsert the user record in PostgreSQL and return an initial authentication payload containing user ID, role, and onboarding completion status."}, {"id": "jwt-middleware", "title": "Stateless JWT Authentication & Role-Based Access Control", "note": "Implement asymmetric RS256 or Ed25519 JWT token generation with dual-token architecture consisting of short-lived access tokens (15-minute expiration) and rotating refresh tokens (30-day expiration stored in HTTP-only, Secure, SameSite=Strict cookies). Build middleware guards to inspect Authorization Bearer headers, decode claims (sub, role, device_id, iss, exp), and inject verified user contexts into downstream handler scopes. Store cryptographic token revocation fingerprints in a Redis blacklist with TTL matching the remaining token lifetime for immediate session invalidation upon logout. Enforce granular Role-Based Access Control (RBAC) across rider, driver, and platform admin endpoints with dedicated permission decorators. Implement automated refresh flow via POST /api/v1/auth/refresh with token reuse detection to trigger instant family revocation if a compromised refresh token is replayed."}, {"id": "driver-document-verification", "title": "Driver KYC & Document Upload Verification Pipeline", "note": "Create the driver onboarding workflow with endpoints POST /api/v1/drivers/documents/presigned-url and POST /api/v1/drivers/documents/submit for driver license, vehicle registration, and commercial insurance uploads. Generate pre-signed S3 upload URLs with client-side SHA-256 checksum validation and a strict 5-minute expiry to keep uploads direct and secure. Store document metadata, expiration dates, OCR text extraction results, and verification statuses (PENDING, APPROVED, REJECTED, EXPIRED) in the 'driver_documents' table. Integrate asynchronous webhook triggers with automated KYC providers (e.g., Persona or Stripe Identity) to verify driver identity and driving history against government databases. Handle edge cases such as blurry image rejections, mismatched document names, and automated expiration warnings dispatched 30 days prior to driver license lapse."}]}, {"id": "phase-3-ride-matching-engine", "title": "Phase 3: High-Concurrency Ride Matching & Dynamic Pricing Engine", "description": "Implement geospatial indexing for active drivers, atomic ride request queueing with lockouts and timeouts, and multi-variable dynamic fare calculation algorithms.", "tip": "Use Redis distributed locks (Redlock or SETNX with UUID owner tokens) during driver assignment to guarantee that a single driver cannot be concurrently dispatched to multiple simultaneous trip requests. Calibrate geospatial search radius expansions in tiered batches (e.g., 1km, 3km, 5km) to balance dispatch latency against network roundtrips. Ensure the fare calculation engine calculates and locks upfront price guarantees with cryptographic nonces to prevent rider disputes caused by transient surge fluctuations.", "tasks": [{"id": "redis-geospatial-driver-index", "title": "Redis Geospatial Driver Presence Index & Heartbeat Engine", "note": "Build high-frequency driver location ingestion endpoints via WebSocket and POST /api/v1/drivers/location executing Redis GEOADD operations on spatial keys ('drivers:available:<city_id>'). Maintain driver state machines (OFFLINE, AVAILABLE, EN_ROUTE_PICKUP, ON_TRIP) in Redis hashes with TTL-backed heartbeat keys that automatically mark drivers OFFLINE if no ping is received within 15 seconds. Implement spatial proximity queries using GEORADIUSBYMEMBER or GEOSEARCH with WITHDIST and WITHCOORD flags to return the top N nearest available drivers sorted by geodesic distance. Cluster spatial keys using H3 hexagonal hierarchical spatial indices or geohash prefixes to eliminate lock contention across distinct metropolitan dispatch zones. Handle edge cases such as rapid GPS drift, duplicate coordinate packets, and tunnel re-entry bursts using Kalman filter smoothing algorithms."}, {"id": "trip-request-queue", "title": "Atomic Trip Request Dispatch Queue & Driver Accept Timeout", "note": "Construct an asynchronous dispatch pipeline with POST /api/v1/trips/request which creates a TRIP_REQUESTED record and pushes the dispatch job to a BullMQ or Celery Redis queue. Implement an atomic driver-offering loop that reserves the nearest candidate driver using Redis SETNX with a 15-second expiration lease and pushes an interactive offer card to the driver's device. If the driver declines or the 15-second TTL expires without an ACCEPT response, release the lock, record the rejection in the dispatch audit log, and cascade the offer to the next closest driver in the spatial candidate list. Limit matching attempts to a maximum of 5 cascading driver iterations or a global 90-second timeout before updating the trip status to NO_DRIVERS_AVAILABLE and notifying the rider. Ensure transactional atomicity via PostgreSQL SELECT FOR UPDATE or Redis Lua scripts during the final trip confirmation transition to prevent race conditions."}, {"id": "fare-calculation", "title": "Dynamic Upfront Pricing, Surge Multiplier & ETA Estimation Engine", "note": "Develop the pricing calculation service at POST /api/v1/trips/estimate-fare utilizing OpenStreetMap/OSRM or Google Maps Distance Matrix APIs for accurate travel duration and route distance. Calculate base fares using the formula: Base Fare + (Estimated Minutes * Per-Minute Rate) + (Estimated Distance * Per-Mile Rate) + Airport/Toll Surcharges. Calculate dynamic surge multipliers in real-time by computing the ratio of active rider demand pings to available drivers within localized H3 hex cells over 5-minute rolling windows. Generate a signed fare token (HMAC-SHA256 containing trip parameters, estimated fare, surge tier, and timestamp) with a 5-minute validity window for the rider to accept. Handle edge cases such as sudden route recalculation, mid-trip destination changes, and minimum cancellation fee rules enforced when a rider cancels 2+ minutes after driver acceptance."}]}, {"id": "phase-4-stripe-payments", "title": "Phase 4: Stripe Connect Escrow, Payouts & Resilient Webhooks", "description": "Architect multi-party marketplace payments using Stripe Connect Custom/Express accounts, two-step authorization holds and captures, and idempotent webhook handlers.", "tip": "Always execute payment authorization holds at the moment of ride booking and only capture the final charge upon trip completion to account for tolls, tips, and route changes. Store all financial transactions in an immutable, append-only double-entry ledger table within PostgreSQL to simplify reconciliation against Stripe payout balances. Guard every incoming Stripe webhook against replay attacks by enforcing raw body cryptographic signature verification and database-backed idempotency event keys.", "tasks": [{"id": "stripe-connect-express", "title": "Stripe Connect Express Onboarding & Split Payment Configuration", "note": "Integrate the Stripe Connect API to provision Express or Custom connected accounts for drivers via POST /api/v1/drivers/stripe/onboarding-link using the stripe.accountLinks.create SDK method. Store the resulting Stripe Account ID ('acct_xxx'), onboarding status, charges_enabled, and payouts_enabled flags in the driver profile table. Configure destination charges or separate charge and transfer architecture specifying the platform application fee percentage (e.g., 20% platform take-rate) and automated payout schedules. Implement endpoints for drivers to query their balance, payout history, and access the Stripe Express dashboard via single-sign-on login links (stripe.accounts.createLoginLink). Handle edge cases including onboarding drop-offs, country-specific KYC compliance requirements, and restricted capability webhooks (account.updated)."}, {"id": "payment-hold-capture", "title": "Two-Phase Payment Authorization Hold & Capture Lifecycle", "note": "Implement the complete ride payment lifecycle starting with a pre-authorization hold via stripe.paymentIntents.create with capture_method='manual' upon trip request confirmation. Attach customer PaymentMethods stored securely in Stripe Vault and pass the calculated upfront fare amount with setup_future_usage options for streamlined one-click rebooking. When the trip status transitions to COMPLETED, compute the final fare including actual mileage, wait-time fees, route tolls, and driver tips, then execute stripe.paymentIntents.capture with amount_to_capture. If the trip is cancelled before pickup within the grace period, call stripe.paymentIntents.cancel to release the held funds immediately and notify the rider. For non-grace cancellations, execute a partial capture corresponding to the standard platform cancellation fee."}, {"id": "webhook-handler-idempotency", "title": "Idempotent Stripe Webhook Ingestion & Financial Ledger Logging", "note": "Build the dedicated webhook listener endpoint POST /api/v1/payments/webhook configured with raw-body parsing to verify stripe-signature headers using stripe.Webhook.constructEvent. Handle critical asynchronous events including 'payment_intent.succeeded', 'payment_intent.payment_failed', 'charge.refunded', 'account.updated', and 'transfer.created'. Implement an idempotency guard using an 'idempotency_keys' database table with unique constraints on Stripe Event IDs to reject duplicate webhook deliveries gracefully with HTTP 200. On successful capture, write corresponding credit and debit entries to the immutable 'ledger_entries' table for rider charge, platform commission revenue, and driver payout liability. Implement retry mechanisms with dead-letter queue routing for downstream business logic failures during webhook handling."}]}, {"id": "phase-5-realtime-launch", "title": "Phase 5: Real-Time Telemetry, Push Notifications & Production Launch", "description": "Scale WebSocket telemetry for live map tracking, configure high-priority FCM push notifications for critical ride events, and execute the production readiness checklist.", "tip": "Throttling and batching driver telemetry updates at 1-2 Hz intervals prevents saturating client rendering threads and backend WebSocket servers while maintaining smooth vehicle animation on maps. Implement exponential reconnection backoffs with heartbeat pings on mobile WebSocket connections to gracefully recover from cellular handoffs between Wi-Fi and 5G towers. Conduct end-to-end chaos engineering tests against simulated database failovers, Redis network partitions, and third-party payment gateway latency prior to launch.", "tasks": [{"id": "websocket-location-streaming", "title": "WebSocket Telemetry & Live Map Route Interpolation", "note": "Deploy high-throughput WebSocket gateway endpoints at /ws/v1/tracking authenticated via handshake query token validation. Connect WebSocket worker nodes to Redis Pub/Sub channels keyed by trip ID ('trips:tracking:<trip_id>') to broadcast driver location updates to connected rider apps with sub-100ms latency. Throttle location transmissions from driver devices to 1 Hz, embedding GPS coordinates, compass bearing, vehicle speed, and accuracy radius within the payload. Implement client-side linear interpolation (lerp) and bezier spline smoothing on Mapbox/Google Maps SDKs to render smooth vehicle movement between GPS update intervals. Handle abrupt socket disconnects, automatic session resumption via message sequence IDs, and channel cleanup upon trip completion."}, {"id": "fcm-push-notifications", "title": "Firebase Cloud Messaging (FCM) & Apple APNs Push Dispatcher", "note": "Integrate the Firebase Admin SDK to deliver low-latency, high-priority push notifications and Apple Push Notification service (APNs) VoIP/Live Activity pings. Create the background notification worker listening to trip state transitions to dispatch alerts for DRIVER_ASSIGNED, DRIVER_ARRIVED, TRIP_STARTED, and RECEIPT_READY. Manage multi-device user device tokens in a 'device_tokens' table with automated invalidation when FCM returns 'messaging/registration-token-not-registered'. Configure notification channels on Android 8.0+ and APNs alert payloads with custom sound files, action buttons (e.g., 'Call Driver', 'Cancel Ride'), and high-priority flags for urgent dispatch alerts. Handle offline delivery fallback, localized notification templates in multiple languages, and badge count synchronizations across devices."}, {"id": "production-deployment-checklist", "title": "Production Hardening, Load Testing & Launch Readiness", "note": "Execute the comprehensive production readiness checklist across cloud infrastructure, security, monitoring, and compliance. Deploy containerized microservices to Kubernetes (EKS/GKE) or AWS ECS with auto-scaling policies based on CPU utilization and active WebSocket connection counts. Conduct stress and load testing with k6 or Locust simulating 10,000 concurrent riders and 2,500 active drivers generating spatial queries and booking requests. Implement distributed tracing with OpenTelemetry, structured JSON logging with Datadog/ELK, and Prometheus/Grafana dashboards for real-time tracking of matching latency, payment failures, and API 5xx errors. Finalize security audits covering OWASP Top 10 vulnerabilities, PCI-DSS compliance verification for Stripe tokenization, automated database point-in-time backups, and a multi-region disaster recovery runbook."}]}]};
+    /* VizCraft shared runtime: injected into every template by generate.py. */
+
+// Theme list is discovered from templates/_themes.css at generate time.
+const VIZCRAFT_THEMES = [{"id": "dark_neon", "label": "Dark Neon"}, {"id": "tokyo_night", "label": "Tokyo Night"}, {"id": "catppuccin_mocha", "label": "Catppuccin Mocha"}, {"id": "github_dark", "label": "GitHub Dark"}, {"id": "rose_pine", "label": "Rose Pine"}, {"id": "everforest", "label": "Everforest"}, {"id": "dracula", "label": "Dracula"}, {"id": "synthwave", "label": "Synthwave 84"}, {"id": "nord", "label": "Nord"}, {"id": "gruvbox", "label": "Gruvbox Dark"}, {"id": "solarized_dark", "label": "Solarized Dark"}, {"id": "monokai", "label": "Monokai"}, {"id": "rdr2_gritty", "label": "RDR2 Gritty"}, {"id": "blueprint", "label": "Blueprint"}, {"id": "terminal", "label": "Terminal Green"}, {"id": "high_contrast", "label": "High Contrast"}, {"id": "minimal_light", "label": "Minimal Light"}, {"id": "solarized_light", "label": "Solarized Light"}, {"id": "paper", "label": "Paper (print-friendly)"}, {"id": "cyberpunk", "label": "Cyberpunk 2077"}];
+
+const REDUCED_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* GSAP is loaded from a CDN. If it is unreachable (offline, blocked, file
+   viewers) install a tiny stand-in that jumps straight to the final state, so
+   the visualization still renders and works, just without entry animations. */
+(function installGsapFallback() {
+  if (typeof window.gsap !== 'undefined') return;
+  const SKIP = { duration: 1, ease: 1, delay: 1, stagger: 1, onUpdate: 1, onComplete: 1, transformOrigin: 1 };
+  function targets(t) {
+    if (typeof t === 'string') return Array.from(document.querySelectorAll(t));
+    if (t && !t.nodeType && typeof t.length === 'number') return Array.from(t);
+    return [t];
+  }
+  function apply(t, vars) {
+    if (!t) return;
+    if (t.nodeType) {
+      if (vars.attr) Object.keys(vars.attr).forEach(k => t.setAttribute(k, vars.attr[k]));
+      if (vars.opacity !== undefined) t.style.opacity = vars.opacity;
+      if (vars.strokeDashoffset !== undefined) t.style.strokeDashoffset = vars.strokeDashoffset;
+      if (vars.y !== undefined || vars.scale !== undefined) {
+        t.style.transform = 'translateY(' + (vars.y || 0) + 'px) scale(' + (vars.scale === undefined ? 1 : vars.scale) + ')';
+      }
+    } else {
+      Object.keys(vars).forEach(k => { if (!SKIP[k]) t[k] = vars[k]; });
     }
-    const vizData = (typeof DATA === 'object' && DATA !== null) ? DATA : {
+    if (typeof vars.onUpdate === 'function') vars.onUpdate();
+  }
+  const chain = {
+    to(t, vars) { targets(t).forEach(e => apply(e, vars)); return chain; },
+    from() { return chain; },
+    call(fn) { fn(); return chain; },
+    fromTo(t, from, to) { targets(t).forEach(e => apply(e, to)); return chain; },
+  };
+  window.gsap = { to: chain.to, from: chain.from, fromTo: chain.fromTo, timeline: () => chain };
+})();
+
+/* Build the theme <select> from the discovered theme list. */
+function populateThemeSelect(selectEl, current) {
+  const themes = VIZCRAFT_THEMES.length ? VIZCRAFT_THEMES : [{ id: 'dark_neon', label: 'Dark Neon' }];
+  selectEl.innerHTML = themes.map(t =>
+    '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.label) + '</option>').join('');
+  selectEl.value = themes.some(t => t.id === current) ? current : themes[0].id;
+}
+
+/* Theme precedence: ?theme=<id> in the URL > project.theme > dark_neon. */
+function resolveTheme(projectTheme) {
+  let wanted = projectTheme;
+  try {
+    const q = new URLSearchParams(window.location.search).get('theme');
+    if (q) wanted = q;
+  } catch (e) { /* ignore */ }
+  const known = VIZCRAFT_THEMES.map(t => t.id);
+  return (wanted && (known.length === 0 || known.indexOf(wanted) !== -1)) ? wanted : 'dark_neon';
+}
+
+
+    const INJECTED = {"project": {"name": "Stripe-Managed SaaS Uber — MVP Build", "description": "Ride-sharing platform with Stripe Connect, real-time tracking, and multi-region support", "theme": "dark_neon"}, "phases": [{"id": "phase-1-infrastructure", "title": "Phase 1: Core Infrastructure & Multi-Region Data Architecture", "description": "Establish highly available relational storage with PostGIS extensions, distributed Redis caching, and centralized secret management for the platform.", "tip": "Prioritize database schema normalization and spatial indexing from day one to avoid costly table migrations when scaling geospatial queries across high-density urban areas. Implement connection pooling using PgBouncer early to prevent ephemeral port exhaustion under heavy concurrent connection spikes. Ensure Redis persistence is configured with both RDB snapshots and AOF (append-only file) with appendfsync everysec to guard against data loss during unexpected broker restarts.", "tasks": [{"id": "postgres-schema", "title": "PostgreSQL Schema & PostGIS Spatial Extensions", "note": "Design the core relational data model in PostgreSQL 16 leveraging PostGIS spatial extensions for fast geographic distance computations and bounding box queries. Key tables must include 'users' (id, role, phone_e164, email, status, created_at), 'driver_profiles' (user_id, license_number, vehicle_type, rating, stripe_account_id, is_active, is_verified), 'trips' (id, rider_id, driver_id, status, pickup_location GEOMETRY(Point, 4326), dropoff_location GEOMETRY(Point, 4326), fare_cents, surge_multiplier, route_polyline, initiated_at, completed_at), and 'ledger_entries' for double-entry accounting. Create spatial GiST indexes on pickup_location and dropoff_location columns to accelerate ST_DWithin and ST_DistanceSphere queries. Implement strict UUIDv7 primary keys for time-ordered clustering, foreign key constraints with ON DELETE RESTRICT on financial records, and table partitioning by month on the trips table to preserve query latency as transaction volumes scale."}, {"id": "redis-setup", "title": "Redis Cluster & Geospatial Cache Layer", "note": "Deploy a low-latency Redis 7.2 cluster configured for geospatial driver tracking, ephemeral session caching, and rate limiting. Utilize Redis GEO commands (GEOADD, GEORADIUS, and GEOSEARCH) to maintain live driver coordinate sets partitioned by geographic geohash or city-level cluster keys. Set up memory eviction policies using volatile-lru with dedicated database instances to separate volatile session tokens from critical driver presence indexes. Implement connection pooling via redis-py or ioredis with automated reconnection backoff, exponential jitter, and health-check ping intervals. Configure Redis Pub/Sub channels for broadcasting ride status state transitions and driver proximity dispatch pings to connected gateway workers."}, {"id": "environment-config", "title": "Centralized Environment Configuration & Secret Management", "note": "Establish an environment isolation pipeline supporting local, staging, and production tiers with zero hardcoded credentials. Implement strict schema validation using Pydantic Settings or Dotenv-vault to enforce presence and type correctness for all runtime secrets including TWILIO_AUTH_TOKEN, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, DATABASE_URL, and REDIS_URL. Integrate AWS Secrets Manager or HashiCorp Vault for dynamic secret rotation and audit logging of cryptographic keys. Configure Docker Compose orchestration files with health checks for PostgreSQL and Redis to standardize developer onboarding and local testing environments. Ensure production builds enforce TLS 1.3 encryption across all database and caching connection strings with automated SSL certificate validation."}]}, {"id": "phase-2-auth-onboarding", "title": "Phase 2: Authentication, Authorization & Driver Onboarding", "description": "Build secure passwordless phone authentication with Twilio OTP, stateless JWT session middleware, and automated driver KYC document verification pipelines.", "tip": "Enforce strict rate limiting per phone number and IP on all OTP initiation endpoints to mitigate SMS toll fraud and bot exhaustion attacks. Isolate rider and driver role claims within cryptographically signed JWT payloads to prevent privilege escalation at the API gateway layer. Use presigned S3/GCS upload URLs with expiring signatures for driver identity documents so sensitive PII never traverses application server memory unencrypted.", "tasks": [{"id": "otp-twilio", "title": "Passwordless Phone Authentication with Twilio Verify", "note": "Develop passwordless authentication endpoints POST /api/v1/auth/otp/send and POST /api/v1/auth/otp/verify using the Twilio Verify v2 REST API. Enforce E.164 phone number formatting via Google's libphonenumber library before dispatching 6-digit numeric verification codes. Implement a sliding window rate limiter in Redis allowing a maximum of 3 OTP requests per phone number every 10 minutes and 10 requests per IP address per hour to stop SMS pumping exploits. Handle edge cases such as invalid country codes, carrier lookup failures, expired tokens (10-minute TTL), and max-retry verification lockouts. On successful verification, upsert the user record in PostgreSQL and return an initial authentication payload containing user ID, role, and onboarding completion status."}, {"id": "jwt-middleware", "title": "Stateless JWT Authentication & Role-Based Access Control", "note": "Implement asymmetric RS256 or Ed25519 JWT token generation with dual-token architecture consisting of short-lived access tokens (15-minute expiration) and rotating refresh tokens (30-day expiration stored in HTTP-only, Secure, SameSite=Strict cookies). Build middleware guards to inspect Authorization Bearer headers, decode claims (sub, role, device_id, iss, exp), and inject verified user contexts into downstream handler scopes. Store cryptographic token revocation fingerprints in a Redis blacklist with TTL matching the remaining token lifetime for immediate session invalidation upon logout. Enforce granular Role-Based Access Control (RBAC) across rider, driver, and platform admin endpoints with dedicated permission decorators. Implement automated refresh flow via POST /api/v1/auth/refresh with token reuse detection to trigger instant family revocation if a compromised refresh token is replayed."}, {"id": "driver-document-verification", "title": "Driver KYC & Document Upload Verification Pipeline", "note": "Create the driver onboarding workflow with endpoints POST /api/v1/drivers/documents/presigned-url and POST /api/v1/drivers/documents/submit for driver license, vehicle registration, and commercial insurance uploads. Generate pre-signed S3 upload URLs with client-side SHA-256 checksum validation and a strict 5-minute expiry to keep uploads direct and secure. Store document metadata, expiration dates, OCR text extraction results, and verification statuses (PENDING, APPROVED, REJECTED, EXPIRED) in the 'driver_documents' table. Integrate asynchronous webhook triggers with automated KYC providers (e.g., Persona or Stripe Identity) to verify driver identity and driving history against government databases. Handle edge cases such as blurry image rejections, mismatched document names, and automated expiration warnings dispatched 30 days prior to driver license lapse."}]}, {"id": "phase-3-ride-matching-engine", "title": "Phase 3: High-Concurrency Ride Matching & Dynamic Pricing Engine", "description": "Implement geospatial indexing for active drivers, atomic ride request queueing with lockouts and timeouts, and multi-variable dynamic fare calculation algorithms.", "tip": "Use Redis distributed locks (Redlock or SETNX with UUID owner tokens) during driver assignment to guarantee that a single driver cannot be concurrently dispatched to multiple simultaneous trip requests. Calibrate geospatial search radius expansions in tiered batches (e.g., 1km, 3km, 5km) to balance dispatch latency against network roundtrips. Ensure the fare calculation engine calculates and locks upfront price guarantees with cryptographic nonces to prevent rider disputes caused by transient surge fluctuations.", "tasks": [{"id": "redis-geospatial-driver-index", "title": "Redis Geospatial Driver Presence Index & Heartbeat Engine", "note": "Build high-frequency driver location ingestion endpoints via WebSocket and POST /api/v1/drivers/location executing Redis GEOADD operations on spatial keys ('drivers:available:<city_id>'). Maintain driver state machines (OFFLINE, AVAILABLE, EN_ROUTE_PICKUP, ON_TRIP) in Redis hashes with TTL-backed heartbeat keys that automatically mark drivers OFFLINE if no ping is received within 15 seconds. Implement spatial proximity queries using GEORADIUSBYMEMBER or GEOSEARCH with WITHDIST and WITHCOORD flags to return the top N nearest available drivers sorted by geodesic distance. Cluster spatial keys using H3 hexagonal hierarchical spatial indices or geohash prefixes to eliminate lock contention across distinct metropolitan dispatch zones. Handle edge cases such as rapid GPS drift, duplicate coordinate packets, and tunnel re-entry bursts using Kalman filter smoothing algorithms."}, {"id": "trip-request-queue", "title": "Atomic Trip Request Dispatch Queue & Driver Accept Timeout", "note": "Construct an asynchronous dispatch pipeline with POST /api/v1/trips/request which creates a TRIP_REQUESTED record and pushes the dispatch job to a BullMQ or Celery Redis queue. Implement an atomic driver-offering loop that reserves the nearest candidate driver using Redis SETNX with a 15-second expiration lease and pushes an interactive offer card to the driver's device. If the driver declines or the 15-second TTL expires without an ACCEPT response, release the lock, record the rejection in the dispatch audit log, and cascade the offer to the next closest driver in the spatial candidate list. Limit matching attempts to a maximum of 5 cascading driver iterations or a global 90-second timeout before updating the trip status to NO_DRIVERS_AVAILABLE and notifying the rider. Ensure transactional atomicity via PostgreSQL SELECT FOR UPDATE or Redis Lua scripts during the final trip confirmation transition to prevent race conditions."}, {"id": "fare-calculation", "title": "Dynamic Upfront Pricing, Surge Multiplier & ETA Estimation Engine", "note": "Develop the pricing calculation service at POST /api/v1/trips/estimate-fare utilizing OpenStreetMap/OSRM or Google Maps Distance Matrix APIs for accurate travel duration and route distance. Calculate base fares using the formula: Base Fare + (Estimated Minutes * Per-Minute Rate) + (Estimated Distance * Per-Mile Rate) + Airport/Toll Surcharges. Calculate dynamic surge multipliers in real-time by computing the ratio of active rider demand pings to available drivers within localized H3 hex cells over 5-minute rolling windows. Generate a signed fare token (HMAC-SHA256 containing trip parameters, estimated fare, surge tier, and timestamp) with a 5-minute validity window for the rider to accept. Handle edge cases such as sudden route recalculation, mid-trip destination changes, and minimum cancellation fee rules enforced when a rider cancels 2+ minutes after driver acceptance."}]}, {"id": "phase-4-stripe-payments", "title": "Phase 4: Stripe Connect Escrow, Payouts & Resilient Webhooks", "description": "Architect multi-party marketplace payments using Stripe Connect Custom/Express accounts, two-step authorization holds and captures, and idempotent webhook handlers.", "tip": "Always execute payment authorization holds at the moment of ride booking and only capture the final charge upon trip completion to account for tolls, tips, and route changes. Store all financial transactions in an immutable, append-only double-entry ledger table within PostgreSQL to simplify reconciliation against Stripe payout balances. Guard every incoming Stripe webhook against replay attacks by enforcing raw body cryptographic signature verification and database-backed idempotency event keys.", "tasks": [{"id": "stripe-connect-express", "title": "Stripe Connect Express Onboarding & Split Payment Configuration", "note": "Integrate the Stripe Connect API to provision Express or Custom connected accounts for drivers via POST /api/v1/drivers/stripe/onboarding-link using the stripe.accountLinks.create SDK method. Store the resulting Stripe Account ID ('acct_xxx'), onboarding status, charges_enabled, and payouts_enabled flags in the driver profile table. Configure destination charges or separate charge and transfer architecture specifying the platform application fee percentage (e.g., 20% platform take-rate) and automated payout schedules. Implement endpoints for drivers to query their balance, payout history, and access the Stripe Express dashboard via single-sign-on login links (stripe.accounts.createLoginLink). Handle edge cases including onboarding drop-offs, country-specific KYC compliance requirements, and restricted capability webhooks (account.updated)."}, {"id": "payment-hold-capture", "title": "Two-Phase Payment Authorization Hold & Capture Lifecycle", "note": "Implement the complete ride payment lifecycle starting with a pre-authorization hold via stripe.paymentIntents.create with capture_method='manual' upon trip request confirmation. Attach customer PaymentMethods stored securely in Stripe Vault and pass the calculated upfront fare amount with setup_future_usage options for streamlined one-click rebooking. When the trip status transitions to COMPLETED, compute the final fare including actual mileage, wait-time fees, route tolls, and driver tips, then execute stripe.paymentIntents.capture with amount_to_capture. If the trip is cancelled before pickup within the grace period, call stripe.paymentIntents.cancel to release the held funds immediately and notify the rider. For non-grace cancellations, execute a partial capture corresponding to the standard platform cancellation fee."}, {"id": "webhook-handler-idempotency", "title": "Idempotent Stripe Webhook Ingestion & Financial Ledger Logging", "note": "Build the dedicated webhook listener endpoint POST /api/v1/payments/webhook configured with raw-body parsing to verify stripe-signature headers using stripe.Webhook.constructEvent. Handle critical asynchronous events including 'payment_intent.succeeded', 'payment_intent.payment_failed', 'charge.refunded', 'account.updated', and 'transfer.created'. Implement an idempotency guard using an 'idempotency_keys' database table with unique constraints on Stripe Event IDs to reject duplicate webhook deliveries gracefully with HTTP 200. On successful capture, write corresponding credit and debit entries to the immutable 'ledger_entries' table for rider charge, platform commission revenue, and driver payout liability. Implement retry mechanisms with dead-letter queue routing for downstream business logic failures during webhook handling."}]}, {"id": "phase-5-realtime-launch", "title": "Phase 5: Real-Time Telemetry, Push Notifications & Production Launch", "description": "Scale WebSocket telemetry for live map tracking, configure high-priority FCM push notifications for critical ride events, and execute the production readiness checklist.", "tip": "Throttling and batching driver telemetry updates at 1-2 Hz intervals prevents saturating client rendering threads and backend WebSocket servers while maintaining smooth vehicle animation on maps. Implement exponential reconnection backoffs with heartbeat pings on mobile WebSocket connections to gracefully recover from cellular handoffs between Wi-Fi and 5G towers. Conduct end-to-end chaos engineering tests against simulated database failovers, Redis network partitions, and third-party payment gateway latency prior to launch.", "tasks": [{"id": "websocket-location-streaming", "title": "WebSocket Telemetry & Live Map Route Interpolation", "note": "Deploy high-throughput WebSocket gateway endpoints at /ws/v1/tracking authenticated via handshake query token validation. Connect WebSocket worker nodes to Redis Pub/Sub channels keyed by trip ID ('trips:tracking:<trip_id>') to broadcast driver location updates to connected rider apps with sub-100ms latency. Throttle location transmissions from driver devices to 1 Hz, embedding GPS coordinates, compass bearing, vehicle speed, and accuracy radius within the payload. Implement client-side linear interpolation (lerp) and bezier spline smoothing on Mapbox/Google Maps SDKs to render smooth vehicle movement between GPS update intervals. Handle abrupt socket disconnects, automatic session resumption via message sequence IDs, and channel cleanup upon trip completion."}, {"id": "fcm-push-notifications", "title": "Firebase Cloud Messaging (FCM) & Apple APNs Push Dispatcher", "note": "Integrate the Firebase Admin SDK to deliver low-latency, high-priority push notifications and Apple Push Notification service (APNs) VoIP/Live Activity pings. Create the background notification worker listening to trip state transitions to dispatch alerts for DRIVER_ASSIGNED, DRIVER_ARRIVED, TRIP_STARTED, and RECEIPT_READY. Manage multi-device user device tokens in a 'device_tokens' table with automated invalidation when FCM returns 'messaging/registration-token-not-registered'. Configure notification channels on Android 8.0+ and APNs alert payloads with custom sound files, action buttons (e.g., 'Call Driver', 'Cancel Ride'), and high-priority flags for urgent dispatch alerts. Handle offline delivery fallback, localized notification templates in multiple languages, and badge count synchronizations across devices."}, {"id": "production-deployment-checklist", "title": "Production Hardening, Load Testing & Launch Readiness", "note": "Execute the comprehensive production readiness checklist across cloud infrastructure, security, monitoring, and compliance. Deploy containerized microservices to Kubernetes (EKS/GKE) or AWS ECS with auto-scaling policies based on CPU utilization and active WebSocket connection counts. Conduct stress and load testing with k6 or Locust simulating 10,000 concurrent riders and 2,500 active drivers generating spatial queries and booking requests. Implement distributed tracing with OpenTelemetry, structured JSON logging with Datadog/ELK, and Prometheus/Grafana dashboards for real-time tracking of matching latency, payment failures, and API 5xx errors. Finalize security audits covering OWASP Top 10 vulnerabilities, PCI-DSS compliance verification for Stripe tokenization, automated database point-in-time backups, and a multi-region disaster recovery runbook."}]}]};
+
+    const SAMPLE = {
       project: { name: 'VizCraft Progress', description: 'Sample Tracking Data', theme: 'dark_neon' },
       phases: [
         {
-          id: "p1",
-          title: "Phase 1: Foundation",
-          description: "Setup infrastructure and core utilities",
-          tip: "Ensure all base dependencies are pinned to avoid drift.",
+          id: 'p1', title: 'Phase 1: Foundation', description: 'Setup infrastructure and core utilities',
+          tip: 'Ensure all base dependencies are pinned to avoid drift.',
           tasks: [
-            {id: "t1", title: "Initialize repository", note: "Run git init, create README, setup .gitignore for Python."},
-            {id: "t2", title: "Setup virtual environment", note: "Create venv using Python 3.11 and install base requirements."},
-            {id: "t3", title: "Configure logger", note: "Setup standard logging module with console and file handlers."}
+            { id: 't1', title: 'Initialize repository', note: 'Run `git init`, create **README**, setup .gitignore for Python.', done: true, priority: 'high', owner: 'Sam' },
+            { id: 't2', title: 'Setup virtual environment', note: 'Create venv using Python 3.11 and install base requirements.' },
+            { id: 't3', title: 'Configure logger', note: 'Setup standard logging module:\n- console handler\n- file handler' }
           ]
         },
         {
-          id: "p2",
-          title: "Phase 2: Core Engine",
-          description: "Build the primary execution loop",
-          tip: "Keep the main loop non-blocking to allow for future UI integrations.",
+          id: 'p2', title: 'Phase 2: Core Engine', description: 'Build the primary execution loop',
+          tip: 'Keep the main loop non-blocking to allow for future UI integrations.',
           tasks: [
-            {id: "t4", title: "Implement brain.py", note: "Create the LLM router and context manager."},
-            {id: "t5", title: "Add tool dispatcher", note: "Map function names to actual python callables in tools.py."}
+            { id: 't4', title: 'Implement brain.py', note: 'Create the LLM router and context manager.', priority: 'medium' },
+            { id: 't5', title: 'Add tool dispatcher', note: 'Map function names to actual python callables in tools.py.', due: 'Fri' }
           ]
         }
       ]
     };
 
+    const vizData = INJECTED || SAMPLE;
     const SVG_CHECK = '<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>';
-    
+    const PRIORITY = {
+      p0: ['high', 'P0'], high: ['high', 'High'], critical: ['high', 'Critical'],
+      p1: ['med', 'P1'], medium: ['med', 'Medium'], med: ['med', 'Medium'],
+      p2: ['low', 'P2'], low: ['low', 'Low']
+    };
+    const $ = id => document.getElementById(id);
+
+    /* Normalise the input: guarantee ids, arrays and strings. */
+    const phases = (vizData.phases || []).map((p, pi) => {
+      const pid = String(p.id != null ? p.id : 'phase-' + pi);
+      return {
+        id: pid, title: String(p.title || 'Phase ' + (pi + 1)), description: p.description || '', tip: p.tip || '',
+        tasks: (p.tasks || []).map((t, ti) => ({
+          id: String(t.id != null ? t.id : pid + '-t' + ti),
+          title: String(t.title || 'Task ' + (ti + 1)), note: t.note || '', done: !!t.done,
+          priority: t.priority ? String(t.priority).toLowerCase() : '', owner: t.owner || '', due: t.due || '',
+          tags: Array.isArray(t.tags) ? t.tags : []
+        }))
+      };
+    });
+    const allTasks = [];
+    phases.forEach(p => p.tasks.forEach(t => allTasks.push({ phase: p, task: t })));
+
     let currentZoom = 1;
-    const phaseColors = ['var(--phase-1)', 'var(--phase-2)', 'var(--phase-3)', 'var(--phase-4)', 'var(--phase-5)', 'var(--phase-6)'];
-    
     let state = { tasks: {} };
-    
+
     function getStorageKey() {
-      const projName = vizData.project?.name || 'default';
-      return 'vizcraft_progress_' + projName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const name = (vizData.project && vizData.project.name) || 'default';
+      return 'vizcraft_progress_' + name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    }
+    function loadState() { try { const saved = localStorage.getItem(getStorageKey()); if (saved) state = JSON.parse(saved); } catch (e) { /* ignore */ } if (!state.tasks) state.tasks = {}; }
+    function saveState() { try { localStorage.setItem(getStorageKey(), JSON.stringify(state)); } catch (e) { /* ignore */ } }
+
+    /* A saved tick wins; otherwise the task's own `done` flag seeds the state. */
+    const isDone = t => (t.id in state.tasks) ? !!state.tasks[t.id] : t.done;
+
+    function metaChips(t) {
+      const chips = [];
+      const pr = PRIORITY[t.priority];
+      if (pr) chips.push('<span class="chip pri-' + pr[0] + '">' + pr[1] + '</span>');
+      else if (t.priority) chips.push('<span class="chip">' + escapeHtml(t.priority) + '</span>');
+      if (t.owner) chips.push('<span class="chip">@' + escapeHtml(t.owner) + '</span>');
+      if (t.due) chips.push('<span class="chip">due ' + escapeHtml(t.due) + '</span>');
+      t.tags.forEach(tag => chips.push('<span class="chip">#' + escapeHtml(tag) + '</span>'));
+      return chips.join('');
+    }
+
+    /* Tiny, safe markdown subset for notes: **bold**, *italic*, `code`, "- " bullets. */
+    function renderNote(text) {
+      const inline = s => s.replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+      let html = '', inList = false;
+      escapeHtml(text).split('\n').forEach(line => {
+        const m = line.match(/^\s*[-*]\s+(.*)$/);
+        if (m) { if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(m[1]) + '</li>'; return; }
+        if (inList) { html += '</ul>'; inList = false; }
+        html += line.trim() === '' ? '<div class="gap"></div>' : '<p>' + inline(line) + '</p>';
+      });
+      return html + (inList ? '</ul>' : '');
     }
 
     function init() {
-      let theme = document.body.getAttribute('data-theme');
-      if (theme === 'dark_neon' && vizData.project?.theme) {
-        theme = vizData.project.theme;
-      } else if (theme === 'dark_neon') {
-        theme = 'dark_neon';
-      }
+      const project = vizData.project || {};
+      const theme = resolveTheme(project.theme);
       document.body.setAttribute('data-theme', theme);
-      document.querySelector('.theme-select').value = theme;
-      
-      if (document.querySelector('.project-name').textContent === 'Stripe-Managed SaaS Uber — MVP Build') {
-        document.querySelector('.project-name').textContent = vizData.project?.name || 'Progress Tracker';
-        document.querySelector('.project-desc').textContent = vizData.project?.description || 'Track your project phases and tasks';
+      populateThemeSelect($('theme-select'), theme);
+
+      const nameEl = document.querySelector('.project-name');
+      if (nameEl.textContent === 'Stripe-Managed SaaS Uber — MVP Build') {
+        nameEl.textContent = project.name || 'Progress Tracker';
+        document.querySelector('.project-desc').textContent = project.description || 'Track your project phases and tasks';
       }
 
       loadState();
       renderPhases();
       renderSidebarTasks();
+      bindEvents();
       updateProgress();
-      
-      setTimeout(() => {
-        document.getElementById('sidebar').classList.add('open');
-      }, 600);
+      $('main-container').classList.add('sidebar-open');
 
-      gsap.to('.phase-card', {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-        delay: 0.3
+      const cards = Array.from(document.querySelectorAll('.phase-card'));
+      if (REDUCED_MOTION) return;
+      cards.forEach(c => c.classList.add('pre'));
+      gsap.to(cards, {
+        y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.2,
+        onComplete: () => cards.forEach(c => { c.classList.remove('pre'); c.style.transform = ''; c.style.opacity = ''; })
       });
+      // Safety net: never leave cards hidden if the tween is interrupted
+      setTimeout(() => cards.forEach(c => { c.classList.remove('pre'); c.style.transform = ''; c.style.opacity = ''; }), 2600);
     }
-    
-    function loadState() {
-      try {
-        const saved = localStorage.getItem(getStorageKey());
-        if (saved) state = JSON.parse(saved);
-      } catch (e) { }
+
+    function bindEvents() {
+      // One delegated listener handles every checkbox / label, in the grid and the sidebar.
+      document.addEventListener('click', ev => {
+        const box = ev.target.closest('.custom-checkbox');
+        if (box) { toggleTask(box.closest('[data-task-id]').dataset.taskId); return; }
+        const label = ev.target.closest('.task-label');
+        if (label) { const item = label.closest('[data-task-id]'); showNote(item.dataset.phaseId, item.dataset.taskId); return; }
+        const head = ev.target.closest('.sidebar-phase-header');
+        if (head) head.parentElement.classList.toggle('expanded');
+      });
+
+      const sidebar = $('sidebar');
+      $('sidebar-toggle').addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        $('main-container').classList.toggle('sidebar-open', sidebar.classList.contains('open'));
+      });
+      document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+      $('theme-select').addEventListener('change', ev => document.body.setAttribute('data-theme', ev.target.value));
+      $('hide-done').addEventListener('change', ev => document.body.classList.toggle('hide-done', ev.target.checked));
+      $('reset-progress').addEventListener('click', () => {
+        if (!window.confirm('Reset all progress for this tracker?')) return;
+        state = { tasks: {} };
+        allTasks.forEach(({ task }) => { state.tasks[task.id] = false; });
+        saveState();
+        document.querySelectorAll('[data-task-id]').forEach(el => el.classList.remove('checked'));
+        updateProgress();
+      });
+      $('next-up').addEventListener('click', () => { const n = nextTask(); if (n) showNote(n.phase.id, n.task.id); });
+      $('zoom-in').addEventListener('click', () => zoom(0.2));
+      $('zoom-out').addEventListener('click', () => zoom(-0.2));
+      $('zoom-reset').addEventListener('click', resetZoom);
     }
-    
-    function saveState() {
-      try { localStorage.setItem(getStorageKey(), JSON.stringify(state)); } catch (e) { }
-    }
-    
+
+    function nextTask() { return allTasks.find(({ task }) => !isDone(task)) || null; }
+
     function toggleTask(taskId) {
-      state.tasks[taskId] = !state.tasks[taskId];
+      const found = allTasks.find(x => x.task.id === taskId);
+      if (!found) return;
+      const nowDone = !isDone(found.task);
+      state.tasks[taskId] = nowDone;
       saveState();
-      
-      const isChecked = state.tasks[taskId];
-      
-      document.querySelectorAll(`[data-task-id="${taskId}"]`).forEach(el => {
-        if (isChecked) {
-          el.classList.add('checked');
-          const cb = el.querySelector('.custom-checkbox');
-          if (cb) {
-            gsap.fromTo(cb, 
-              {scale: 0.8, rotation: -15}, 
-              {scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2)"}
-            );
-          }
-        } else {
-          el.classList.remove('checked');
-        }
+      document.querySelectorAll('[data-task-id]').forEach(el => {
+        if (el.dataset.taskId !== taskId) return;
+        el.classList.toggle('checked', nowDone);
+        const cb = el.querySelector('.custom-checkbox');
+        if (nowDone && cb) gsap.fromTo(cb, { scale: 0.8, rotation: -15 }, { scale: 1, rotation: 0, duration: 0.5, ease: 'back.out(2)' });
       });
-      
       updateProgress();
     }
-    
+
     function updateProgress() {
-      let totalTasks = 0, completedTasks = 0;
-      
-      vizData.phases.forEach((p, idx) => {
-        let phaseTotal = p.tasks.length, phaseCompleted = 0;
-        
-        p.tasks.forEach(t => {
-          totalTasks++;
-          if (state.tasks[t.id]) { phaseCompleted++; completedTasks++; }
-        });
-        
-        const cardFill = document.getElementById(`phase-fill-${p.id}`);
-        const sidebarFraction = document.getElementById(`sidebar-fraction-${p.id}`);
-        const cardEl = document.getElementById(`phase-card-${p.id}`);
-        const badgeEl = document.getElementById(`badge-${p.id}`);
-        
-        if (cardFill) cardFill.style.width = phaseTotal > 0 ? `${(phaseCompleted / phaseTotal) * 100}%` : '100%';
-        if (sidebarFraction) sidebarFraction.innerText = `${phaseCompleted}/${phaseTotal}`;
-        
-        if (phaseTotal > 0 && phaseCompleted === phaseTotal) {
-          if (cardEl && !cardEl.classList.contains('completed')) {
-            cardEl.classList.add('completed');
-            if (badgeEl) {
-              gsap.fromTo(badgeEl, 
-                {scale: 0.5, opacity: 0, y: 10},
-                {scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.5)", delay: 0.1}
-              );
-            }
-          }
-        } else {
-          if (cardEl) cardEl.classList.remove('completed');
-          if (badgeEl) badgeEl.style.opacity = '0';
+      let total = 0, completed = 0;
+      phases.forEach(p => {
+        const done = p.tasks.filter(isDone).length;
+        total += p.tasks.length; completed += done;
+        const fill = $('phase-fill-' + p.id), frac = $('sidebar-fraction-' + p.id), card = $('phase-card-' + p.id);
+        if (fill) fill.style.width = p.tasks.length ? (done / p.tasks.length * 100) + '%' : '100%';
+        if (frac) frac.textContent = done + '/' + p.tasks.length;
+        if (!card) return;
+        const complete = p.tasks.length > 0 && done === p.tasks.length;
+        const was = card.classList.contains('completed');
+        card.classList.toggle('completed', complete);
+        if (complete && !was) {
+          const badge = card.querySelector('.complete-badge');
+          gsap.fromTo(badge, { scale: 0.5, opacity: 0, y: 10 }, { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.5)' });
         }
       });
-      
-      const overallFill = document.getElementById('overall-progress-fill');
-      const overallLabel = document.getElementById('overall-progress-label');
-      
-      overallFill.style.width = totalTasks > 0 ? `${(completedTasks / totalTasks) * 100}%` : '100%';
-      overallLabel.innerText = `${completedTasks} / ${totalTasks} tasks`;
+      $('overall-progress-fill').style.width = total ? (completed / total * 100) + '%' : '100%';
+      $('overall-progress-label').textContent = completed + ' / ' + total + ' tasks';
+      const n = nextTask();
+      $('next-up').style.display = n ? 'block' : 'none';
+      if (n) $('next-up-title').textContent = n.task.title;
     }
-    
+
     function showNote(phaseId, taskId) {
-      const phase = vizData.phases.find(p => p.id === phaseId);
-      const task = phase?.tasks.find(t => t.id === taskId);
-      
-      if (phase && task) {
-        document.getElementById('notes-empty').style.display = 'none';
-        document.getElementById('notes-container').style.display = 'block';
-        
-        document.getElementById('notes-task-title').innerText = task.title;
-        document.getElementById('notes-content-text').innerText = task.note || "No details provided.";
-        document.getElementById('notes-phase-tip').innerText = phase.tip || "";
-        
-        switchTab('notes');
-        document.getElementById('sidebar').classList.add('open');
-      }
+      const found = allTasks.find(x => x.phase.id === phaseId && x.task.id === taskId);
+      if (!found) return;
+      const { phase, task } = found;
+      $('notes-empty').style.display = 'none';
+      $('notes-container').style.display = 'block';
+      $('notes-task-title').textContent = task.title;
+      $('notes-meta').innerHTML = metaChips(task) || '<span class="chip">' + escapeHtml(phase.title) + '</span>';
+      $('notes-content-text').innerHTML = renderNote(task.note || 'No details provided.');
+      const tip = $('notes-phase-tip');
+      tip.style.display = phase.tip ? 'block' : 'none';
+      tip.querySelector('span').textContent = phase.tip;
+      switchTab('notes');
+      $('sidebar').classList.add('open');
+      $('main-container').classList.add('sidebar-open');
+    }
+
+    function taskHtml(p, t, color, compact) {
+      const checked = isDone(t) ? ' checked' : '';
+      const meta = compact ? '' : (metaChips(t) ? '<div class="task-meta">' + metaChips(t) + '</div>' : '');
+      const size = compact ? ' style="color:' + color + ';width:14px;height:14px;margin-top:1px"' : ' style="color:' + color + '"';
+      return '<' + (compact ? 'div class="sidebar-task-item task-item' : 'li class="task-item') + checked + '" data-task-id="' + escapeHtml(t.id) + '" data-phase-id="' + escapeHtml(p.id) + '">' +
+        '<div class="custom-checkbox"' + size + '>' + SVG_CHECK + '</div>' +
+        '<div class="task-body"><div class="task-label">' + escapeHtml(t.title) + '</div>' + meta + '</div>' +
+        '</' + (compact ? 'div' : 'li') + '>';
     }
 
     function renderPhases() {
-      const grid = document.getElementById('phases-grid');
+      const grid = $('phases-grid');
       grid.innerHTML = '';
-      
-      vizData.phases.forEach((p, index) => {
-        const color = phaseColors[index % phaseColors.length];
-        
+      phases.forEach((p, index) => {
+        const color = 'var(--phase-' + (index % 6 + 1) + ')';
         const card = document.createElement('div');
         card.className = 'phase-card';
-        card.id = `phase-card-${p.id}`;
+        card.id = 'phase-card-' + p.id;
         card.style.setProperty('--phase-color', color);
-        
-        let tasksHtml = '';
-        p.tasks.forEach(t => {
-          const isChecked = state.tasks[t.id] ? 'checked' : '';
-          tasksHtml += `
-            <li class="task-item ${isChecked}" data-task-id="${t.id}">
-              <div class="custom-checkbox" onclick="toggleTask('${t.id}')" style="color: ${color}">
-                ${SVG_CHECK}
-              </div>
-              <div class="task-label" onclick="showNote('${p.id}', '${t.id}')" title="${t.note || ''}">${t.title}</div>
-            </li>
-          `;
-        });
-        
-        card.innerHTML = `
-          <div class="complete-badge" id="badge-${p.id}">PHASE COMPLETE</div>
-          <div class="phase-num">Phase 0${index + 1}</div>
-          <div class="phase-title">${p.title}</div>
-          <div class="phase-desc">${p.description}</div>
-          <div class="mini-progress-bg">
-            <div class="mini-progress-fill" id="phase-fill-${p.id}" style="background-color: ${color}"></div>
-          </div>
-          <ul class="task-list">
-            ${tasksHtml}
-          </ul>
-        `;
-        
+        card.innerHTML =
+          '<div class="complete-badge">PHASE COMPLETE</div>' +
+          '<div class="phase-num">Phase ' + String(index + 1).padStart(2, '0') + '</div>' +
+          '<div class="phase-title">' + escapeHtml(p.title) + '</div>' +
+          '<div class="phase-desc">' + escapeHtml(p.description) + '</div>' +
+          '<div class="mini-progress-bg"><div class="mini-progress-fill" id="phase-fill-' + escapeHtml(p.id) + '" style="background-color:' + color + '"></div></div>' +
+          '<ul class="task-list">' + p.tasks.map(t => taskHtml(p, t, color, false)).join('') + '</ul>';
         grid.appendChild(card);
       });
     }
-    
+
     function renderSidebarTasks() {
-      const container = document.getElementById('tab-tasks');
+      const container = $('tab-tasks');
       container.innerHTML = '';
-      
-      vizData.phases.forEach((p, index) => {
-        const color = phaseColors[index % phaseColors.length];
-        
-        const phaseDiv = document.createElement('div');
-        phaseDiv.className = 'sidebar-phase expanded';
-        
-        let tasksHtml = '';
-        p.tasks.forEach(t => {
-          const isChecked = state.tasks[t.id] ? 'checked' : '';
-          tasksHtml += `
-            <div class="sidebar-task-item task-item ${isChecked}" data-task-id="${t.id}">
-              <div class="custom-checkbox" onclick="toggleTask('${t.id}')" style="color: ${color}; width: 14px; height: 14px; margin-top: 1px;">
-                <svg viewBox="0 0 24 24" style="width:10px; height:10px; stroke-width: 3;"><path d="M20 6L9 17l-5-5"></path></svg>
-              </div>
-              <div class="task-label" style="font-size: 12px;" onclick="showNote('${p.id}', '${t.id}')">${t.title}</div>
-            </div>
-          `;
-        });
-        
-        phaseDiv.innerHTML = `
-          <div class="sidebar-phase-header" onclick="this.classList.parentElement.classList.toggle('expanded')">
-            <div class="sidebar-phase-dot" style="background: ${color}; color: ${color}"></div>
-            <div class="sidebar-phase-title">${p.title}</div>
-            <div class="sidebar-phase-fraction" id="sidebar-fraction-${p.id}">0/0</div>
-          </div>
-          <div class="sidebar-tasks">
-            ${tasksHtml}
-          </div>
-        `;
-        
-        container.appendChild(phaseDiv);
+      phases.forEach((p, index) => {
+        const color = 'var(--phase-' + (index % 6 + 1) + ')';
+        const div = document.createElement('div');
+        div.className = 'sidebar-phase expanded';
+        div.innerHTML =
+          '<div class="sidebar-phase-header">' +
+            '<div class="sidebar-phase-dot" style="background:' + color + ';color:' + color + '"></div>' +
+            '<div class="sidebar-phase-title">' + escapeHtml(p.title) + '</div>' +
+            '<div class="sidebar-phase-fraction" id="sidebar-fraction-' + escapeHtml(p.id) + '">0/0</div>' +
+          '</div>' +
+          '<div class="sidebar-tasks">' + p.tasks.map(t => taskHtml(p, t, color, true)).join('') + '</div>';
+        container.appendChild(div);
       });
     }
 
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-    
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      const btnIndex = tabId === 'tasks' ? 0 : 1;
-      document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
+      $('tab-' + tabId).classList.add('active');
     }
-
-    function changeTheme(theme) { document.body.setAttribute('data-theme', theme); }
 
     function zoom(delta) {
       currentZoom = Math.max(0.4, Math.min(currentZoom + delta, 2));
-      document.getElementById('phases-viewport').style.transform = `scale(${currentZoom})`;
+      $('phases-viewport').style.transform = 'scale(' + currentZoom + ')';
     }
-    
-    function resetZoom() {
-      currentZoom = 1;
-      document.getElementById('phases-viewport').style.transform = `scale(1)`;
-    }
+    function resetZoom() { currentZoom = 1; $('phases-viewport').style.transform = 'scale(1)'; }
 
     window.addEventListener('DOMContentLoaded', init);
   </script>

@@ -1,0 +1,413 @@
+/*
+  VizCraft shared themes
+  ----------------------
+  Injected into every template at generate time (see generate.py).
+
+  To add a theme:
+    1. Add a block below with a `@theme <id> | <Label>` marker comment.
+    2. Define at least the core tokens (bg / surface / border / text / accent).
+    3. Done. generate.py discovers the marker and the theme picker, the
+       validator and SKILL.md-listed names all pick it up from here.
+
+  Tokens
+    --bg-color --surface-color --border-color --text-main --text-muted
+    --accent --complete-color            core palette
+    --group-fill --node-fill --node-stroke   architecture surfaces
+    --dot-color                          background grid dots
+    --kind-<kind>                        node colours (architecture)
+    --phase-1..6                         phase colours (progress)
+*/
+
+:root {
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --font-mono: 'Space Mono', monospace;
+
+  /* Default kind palette (dark backgrounds) */
+  --kind-entry: #3b82f6;
+  --kind-agent: #f59e0b;
+  --kind-service: #8b5cf6;
+  --kind-store: #10b981;
+  --kind-external: #06b6d4;
+  --kind-model: #ec4899;
+  --kind-cron: #f97316;
+  --kind-tool: #84cc16;
+  --kind-queue: #d946ef;
+  --kind-gateway: #14b8a6;
+  --kind-client: #60a5fa;
+  --kind-cache: #facc15;
+  --kind-function: #fb7185;
+  --kind-user: #cbd5e1;
+  --kind-monitor: #818cf8;
+  --kind-security: #ef4444;
+  --kind-default: #7a7f87;
+}
+
+/* Derived tokens: resolved on <body> so they follow the active theme. */
+body {
+  --track-bg: rgba(128, 128, 128, 0.18);
+  --hover-bg: rgba(128, 128, 128, 0.12);
+  --phase-1: var(--kind-entry);
+  --phase-2: var(--kind-service);
+  --phase-3: var(--kind-store);
+  --phase-4: var(--kind-agent);
+  --phase-5: var(--kind-model);
+  --phase-6: var(--kind-external);
+}
+
+/* ---------------------------------------------------------------- dark */
+
+/* @theme dark_neon | Dark Neon */
+:root, [data-theme="dark_neon"] {
+  --bg-color: #07070a;
+  --surface-color: rgba(18, 18, 22, 0.8);
+  --border-color: rgba(255, 255, 255, 0.09);
+  --text-main: #ececec;
+  --text-muted: #8a8f98;
+  --accent: #ffffff;
+  --complete-color: #10b981;
+  --group-fill: #0b0b0f;
+  --node-fill: #131318;
+  --node-stroke: rgba(255, 255, 255, 0.12);
+  --dot-color: rgba(255, 255, 255, 0.07);
+}
+
+/* @theme tokyo_night | Tokyo Night */
+[data-theme="tokyo_night"] {
+  --bg-color: #1a1b26;
+  --surface-color: rgba(26, 27, 38, 0.9);
+  --border-color: #2f334d;
+  --text-main: #c0caf5;
+  --text-muted: #7f88b3;
+  --accent: #7aa2f7;
+  --complete-color: #9ece6a;
+  --group-fill: #16161e;
+  --node-fill: #24283b;
+  --node-stroke: #3b4261;
+  --dot-color: rgba(122, 162, 247, 0.1);
+  --kind-entry: #7aa2f7; --kind-agent: #e0af68; --kind-service: #bb9af7; --kind-store: #9ece6a;
+  --kind-external: #7dcfff; --kind-model: #f7768e; --kind-cron: #ff9e64; --kind-tool: #73daca;
+}
+
+/* @theme catppuccin_mocha | Catppuccin Mocha */
+[data-theme="catppuccin_mocha"] {
+  --bg-color: #1e1e2e;
+  --surface-color: rgba(30, 30, 46, 0.9);
+  --border-color: #45475a;
+  --text-main: #cdd6f4;
+  --text-muted: #9399b2;
+  --accent: #cba6f7;
+  --complete-color: #a6e3a1;
+  --group-fill: #181825;
+  --node-fill: #313244;
+  --node-stroke: #45475a;
+  --dot-color: rgba(205, 214, 244, 0.07);
+  --kind-entry: #89b4fa; --kind-agent: #f9e2af; --kind-service: #cba6f7; --kind-store: #a6e3a1;
+  --kind-external: #89dceb; --kind-model: #f5c2e7; --kind-cron: #fab387; --kind-tool: #94e2d5;
+}
+
+/* @theme github_dark | GitHub Dark */
+[data-theme="github_dark"] {
+  --bg-color: #0d1117;
+  --surface-color: rgba(22, 27, 34, 0.9);
+  --border-color: #30363d;
+  --text-main: #e6edf3;
+  --text-muted: #8d96a0;
+  --accent: #2f81f7;
+  --complete-color: #3fb950;
+  --group-fill: #0a0e14;
+  --node-fill: #161b22;
+  --node-stroke: #30363d;
+  --dot-color: rgba(230, 237, 243, 0.06);
+  --kind-entry: #58a6ff; --kind-agent: #d29922; --kind-service: #bc8cff; --kind-store: #3fb950;
+  --kind-external: #39c5cf; --kind-model: #f778ba; --kind-cron: #f0883e; --kind-tool: #7ee787;
+}
+
+/* @theme rose_pine | Rose Pine */
+[data-theme="rose_pine"] {
+  --bg-color: #191724;
+  --surface-color: rgba(25, 23, 36, 0.9);
+  --border-color: #403d52;
+  --text-main: #e0def4;
+  --text-muted: #908caa;
+  --accent: #ebbcba;
+  --complete-color: #9ccfd8;
+  --group-fill: #16141f;
+  --node-fill: #26233a;
+  --node-stroke: #403d52;
+  --dot-color: rgba(224, 222, 244, 0.07);
+  --kind-entry: #9ccfd8; --kind-agent: #f6c177; --kind-service: #c4a7e7; --kind-store: #a3be8c;
+  --kind-external: #7aa2c4; --kind-model: #eb6f92; --kind-cron: #ebbcba; --kind-tool: #c0d99a;
+}
+
+/* @theme everforest | Everforest */
+[data-theme="everforest"] {
+  --bg-color: #2d353b;
+  --surface-color: rgba(45, 53, 59, 0.92);
+  --border-color: #475258;
+  --text-main: #d3c6aa;
+  --text-muted: #9da9a0;
+  --accent: #a7c080;
+  --complete-color: #a7c080;
+  --group-fill: #272e33;
+  --node-fill: #343f44;
+  --node-stroke: #475258;
+  --dot-color: rgba(211, 198, 170, 0.07);
+  --kind-entry: #7fbbb3; --kind-agent: #dbbc7f; --kind-service: #d699b6; --kind-store: #a7c080;
+  --kind-external: #83c092; --kind-model: #e67e80; --kind-cron: #e69875; --kind-tool: #b8c27e;
+  --kind-security: #f0787a;
+}
+
+/* @theme dracula | Dracula */
+[data-theme="dracula"] {
+  --bg-color: #282a36;
+  --surface-color: rgba(40, 42, 54, 0.92);
+  --border-color: #44475a;
+  --text-main: #f8f8f2;
+  --text-muted: #8a94c8;
+  --accent: #ff79c6;
+  --complete-color: #50fa7b;
+  --group-fill: #21222c;
+  --node-fill: #343746;
+  --node-stroke: #50536a;
+  --dot-color: rgba(248, 248, 242, 0.06);
+  --kind-entry: #8be9fd; --kind-agent: #f1fa8c; --kind-service: #bd93f9; --kind-store: #50fa7b;
+  --kind-external: #7ea8ff; --kind-model: #ff79c6; --kind-cron: #ffb86c; --kind-tool: #a4ffb0;
+  --kind-security: #ff6e6e;
+}
+
+/* @theme synthwave | Synthwave 84 */
+[data-theme="synthwave"] {
+  --bg-color: #2b213a;
+  --surface-color: rgba(43, 33, 58, 0.92);
+  --border-color: #463563;
+  --text-main: #f9f9f9;
+  --text-muted: #b891d4;
+  --accent: #f85b84;
+  --complete-color: #3fe0d0;
+  --group-fill: #231a31;
+  --node-fill: #34284a;
+  --node-stroke: #5a4580;
+  --dot-color: rgba(248, 91, 132, 0.12);
+}
+
+/* @theme nord | Nord */
+[data-theme="nord"] {
+  --bg-color: #2e3440;
+  --surface-color: rgba(46, 52, 64, 0.92);
+  --border-color: #4c566a;
+  --text-main: #eceff4;
+  --text-muted: #aab3c5;
+  --accent: #88c0d0;
+  --complete-color: #a3be8c;
+  --group-fill: #2a303b;
+  --node-fill: #3b4252;
+  --node-stroke: #4c566a;
+  --dot-color: rgba(236, 239, 244, 0.06);
+  --kind-entry: #81a1c1; --kind-agent: #ebcb8b; --kind-service: #b48ead; --kind-store: #a3be8c;
+  --kind-external: #88c0d0; --kind-model: #d08cae; --kind-cron: #d08770; --kind-tool: #a7c080;
+  --kind-queue: #c7a0d9; --kind-security: #e57d86;
+}
+
+/* @theme gruvbox | Gruvbox Dark */
+[data-theme="gruvbox"] {
+  --bg-color: #282828;
+  --surface-color: rgba(40, 40, 40, 0.92);
+  --border-color: #504945;
+  --text-main: #ebdbb2;
+  --text-muted: #a89984;
+  --accent: #fe8019;
+  --complete-color: #b8bb26;
+  --group-fill: #232323;
+  --node-fill: #32302f;
+  --node-stroke: #504945;
+  --dot-color: rgba(235, 219, 178, 0.06);
+  --kind-entry: #83a598; --kind-agent: #fabd2f; --kind-service: #d3869b; --kind-store: #b8bb26;
+  --kind-external: #8ec07c; --kind-model: #fb4934; --kind-cron: #fe8019; --kind-tool: #b8bb26;
+}
+
+/* @theme solarized_dark | Solarized Dark */
+[data-theme="solarized_dark"] {
+  --bg-color: #002b36;
+  --surface-color: rgba(0, 43, 54, 0.92);
+  --border-color: #0f4a58;
+  --text-main: #93a1a1;
+  --text-muted: #7f9aa1;
+  --accent: #b58900;
+  --complete-color: #2aa198;
+  --group-fill: #00252f;
+  --node-fill: #073642;
+  --node-stroke: #1a5563;
+  --dot-color: rgba(147, 161, 161, 0.08);
+  --kind-entry: #3a9be2; --kind-agent: #c99a00; --kind-service: #8a8fe0; --kind-store: #859900;
+  --kind-external: #2aa198; --kind-model: #e8589c; --kind-cron: #e8683a; --kind-tool: #7a9a00;
+}
+
+/* @theme monokai | Monokai */
+[data-theme="monokai"] {
+  --bg-color: #272822;
+  --surface-color: rgba(39, 40, 34, 0.92);
+  --border-color: #49483e;
+  --text-main: #f8f8f2;
+  --text-muted: #9b977f;
+  --accent: #fd971f;
+  --complete-color: #a6e22e;
+  --group-fill: #22231d;
+  --node-fill: #34352d;
+  --node-stroke: #4b4a3d;
+  --dot-color: rgba(248, 248, 242, 0.06);
+  --kind-entry: #66d9ef; --kind-agent: #e6db74; --kind-service: #ae81ff; --kind-store: #a6e22e;
+  --kind-external: #66d9ef; --kind-model: #f92672; --kind-cron: #fd971f; --kind-tool: #a6e22e;
+}
+
+/* @theme rdr2_gritty | RDR2 Gritty */
+[data-theme="rdr2_gritty"] {
+  --font-sans: Georgia, serif;
+  --font-mono: 'Courier New', Courier, monospace;
+  --bg-color: #14100c;
+  --surface-color: rgba(34, 27, 20, 0.9);
+  --border-color: #4a3c2c;
+  --text-main: #e6d8c0;
+  --text-muted: #a69880;
+  --accent: #d63c3c;
+  --complete-color: #4ade80;
+  --group-fill: #1a1510;
+  --node-fill: #241c14;
+  --node-stroke: #4a3c2c;
+  --dot-color: rgba(230, 216, 192, 0.07);
+  --kind-entry: #6f9bb5; --kind-agent: #d9a441; --kind-service: #9a7bb0; --kind-store: #7a9a5c;
+  --kind-external: #5fa39b; --kind-model: #c4607a; --kind-cron: #c9743a; --kind-tool: #a3a84a;
+}
+
+/* @theme blueprint | Blueprint */
+[data-theme="blueprint"] {
+  --font-sans: 'Space Mono', 'Courier New', monospace;
+  --bg-color: #0a2f5c;
+  --surface-color: rgba(10, 47, 92, 0.92);
+  --border-color: rgba(255, 255, 255, 0.28);
+  --text-main: #e8f1ff;
+  --text-muted: #9fc2ee;
+  --accent: #ffffff;
+  --complete-color: #7cffb2;
+  --group-fill: #0c3566;
+  --node-fill: #0d3d75;
+  --node-stroke: rgba(255, 255, 255, 0.6);
+  --dot-color: rgba(255, 255, 255, 0.22);
+  --kind-entry: #ffffff; --kind-agent: #ffe08a; --kind-service: #b9d4ff; --kind-store: #9cf0d0;
+  --kind-external: #8fe3ff; --kind-model: #ffb3d9; --kind-cron: #ffc58a; --kind-tool: #d4f58f;
+  --kind-queue: #e3b8ff; --kind-gateway: #8ff0e0; --kind-client: #cfe3ff; --kind-cache: #fff3a0;
+  --kind-function: #ffb0b8; --kind-user: #ffffff; --kind-monitor: #c6caff; --kind-security: #ff9a9a;
+}
+
+/* @theme terminal | Terminal Green */
+[data-theme="terminal"] {
+  --font-sans: 'Space Mono', 'Courier New', monospace;
+  --bg-color: #000000;
+  --surface-color: rgba(0, 8, 2, 0.92);
+  --border-color: #0f5a22;
+  --text-main: #33ff66;
+  --text-muted: #1fa341;
+  --accent: #33ff66;
+  --complete-color: #33ff66;
+  --group-fill: #020a04;
+  --node-fill: #04140a;
+  --node-stroke: #148a34;
+  --dot-color: rgba(51, 255, 102, 0.1);
+  --kind-entry: #33ff66; --kind-agent: #ffb000; --kind-service: #66ffcc; --kind-store: #99ff33;
+  --kind-external: #33ccff; --kind-model: #ff66cc; --kind-cron: #ff9933; --kind-tool: #ccff66;
+  --kind-queue: #ff77ff; --kind-gateway: #44ffee; --kind-client: #77ccff; --kind-cache: #ffee33;
+  --kind-function: #ff7777; --kind-user: #d6ffe0; --kind-monitor: #99aaff; --kind-security: #ff5555;
+}
+
+/* @theme high_contrast | High Contrast */
+[data-theme="high_contrast"] {
+  --bg-color: #000000;
+  --surface-color: rgba(0, 0, 0, 0.96);
+  --border-color: #ffffff;
+  --text-main: #ffffff;
+  --text-muted: #d0d0d0;
+  --accent: #ffd400;
+  --complete-color: #00ff7f;
+  --group-fill: #000000;
+  --node-fill: #000000;
+  --node-stroke: #ffffff;
+  --dot-color: rgba(255, 255, 255, 0.18);
+  --kind-entry: #4da3ff; --kind-agent: #ffd400; --kind-service: #c792ff; --kind-store: #00ff7f;
+  --kind-external: #00e5ff; --kind-model: #ff5fb8; --kind-cron: #ff9f1a; --kind-tool: #b6ff3a;
+}
+
+/* --------------------------------------------------------------- light */
+
+/* Shared darker kind palette for light backgrounds */
+[data-theme="minimal_light"], [data-theme="solarized_light"], [data-theme="paper"], [data-theme="cyberpunk"] {
+  --kind-entry: #2563eb; --kind-agent: #b45309; --kind-service: #7c3aed; --kind-store: #059669;
+  --kind-external: #0891b2; --kind-model: #db2777; --kind-cron: #ea580c; --kind-tool: #4d7c0f;
+  --kind-queue: #a21caf; --kind-gateway: #0f766e; --kind-client: #0284c7; --kind-cache: #a16207;
+  --kind-function: #e11d48; --kind-user: #475569; --kind-monitor: #4f46e5; --kind-security: #b91c1c;
+  --kind-default: #6b7280;
+  --logo-filter: invert(1);   /* white simpleicons logos -> black */
+}
+
+/* @theme minimal_light | Minimal Light */
+[data-theme="minimal_light"] {
+  --bg-color: #f4f4f2;
+  --surface-color: rgba(255, 255, 255, 0.88);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --text-main: #111111;
+  --text-muted: #666666;
+  --accent: #111111;
+  --complete-color: #10b981;
+  --group-fill: #ebebe8;
+  --node-fill: #ffffff;
+  --node-stroke: rgba(0, 0, 0, 0.16);
+  --dot-color: rgba(0, 0, 0, 0.09);
+}
+
+/* @theme solarized_light | Solarized Light */
+[data-theme="solarized_light"] {
+  --bg-color: #fdf6e3;
+  --surface-color: rgba(253, 246, 227, 0.94);
+  --border-color: #d8cfb4;
+  --text-main: #586e75;
+  --text-muted: #5c7176;
+  --accent: #cb4b16;
+  --complete-color: #859900;
+  --group-fill: #f5eed6;
+  --node-fill: #fffcf0;
+  --node-stroke: #cfc6a8;
+  --dot-color: rgba(88, 110, 117, 0.12);
+  --kind-entry: #268bd2; --kind-agent: #b58900; --kind-service: #6c71c4; --kind-store: #859900;
+  --kind-external: #2aa198; --kind-model: #d33682; --kind-cron: #cb4b16; --kind-tool: #5f8a1e;
+}
+
+/* @theme paper | Paper (print-friendly) */
+[data-theme="paper"] {
+  --font-sans: Georgia, 'Times New Roman', serif;
+  --bg-color: #fbfaf7;
+  --surface-color: rgba(251, 250, 247, 0.94);
+  --border-color: #d9d6cc;
+  --text-main: #1f1f1f;
+  --text-muted: #6b6860;
+  --accent: #b3261e;
+  --complete-color: #2e7d32;
+  --group-fill: #f3f1ea;
+  --node-fill: #ffffff;
+  --node-stroke: #bdb9ab;
+  --dot-color: rgba(0, 0, 0, 0.07);
+  --kind-entry: #1d4e89; --kind-agent: #b7791f; --kind-service: #5b3f8c; --kind-store: #2f6f4f;
+  --kind-external: #1b7f8c; --kind-model: #a1306b; --kind-cron: #b4531a; --kind-tool: #5c7a1f;
+}
+
+/* @theme cyberpunk | Cyberpunk 2077 */
+[data-theme="cyberpunk"] {
+  --bg-color: #fce300;
+  --surface-color: rgba(252, 227, 0, 0.94);
+  --border-color: #000000;
+  --text-main: #000000;
+  --text-muted: #333333;
+  --accent: #ff003c;
+  --complete-color: #00f0ff;
+  --group-fill: #f2d900;
+  --node-fill: #fff7a8;
+  --node-stroke: #000000;
+  --dot-color: rgba(0, 0, 0, 0.14);
+}

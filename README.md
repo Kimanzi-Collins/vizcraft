@@ -25,21 +25,25 @@ VizCraft turns pure JSON data into stunning, interactive HTML visualizations wit
 
 <br/>
 
-### 🚀 Two Visualization Types
+### 🚀 What you can build
 
 1. 🌐 **Architecture Maps:** Codebase maps, system diagrams, microservice graphs.
-2. 📈 **Progress Trackers:** Sprint boards, phased roadmaps, Kanban trackers.
+2. 🔀 **Flowcharts:** Decision flows using `pill` / `diamond` / `hexagon` / `cylinder` shapes, from the same template.
+3. 📈 **Progress Trackers:** Sprint boards, phased roadmaps, task lists with owners, priorities and due dates.
 
 ### ⚡ Core Features
 
-- 💎 **Intelligent Layout Engine:** Automatically organized group boxes, node chips, and fluid curved edges.
-- ✨ **Animated Data-flow Particles:** Visual routing particles that flow smoothly along exact bezier curves.
-- 📖 **Story Mode:** Sliding sidebar with a step-by-step walkthrough highlighting specific nodes of your architecture.
+- 🧭 **Auto-layout:** Leave out `x`/`y` and VizCraft arranges groups and nodes in layers that follow your edges (`LR` or `TB`). No coordinate maths.
+- 🔌 **Collision-free edge routing:** Edges are routed around nodes on a grid, parallel edges get their own lanes and ports, and labels are placed clear of nodes and each other. Four styles: `orthogonal`, `curved`, `step`, `straight`.
+- ✨ **Animated Data-flow Particles:** Visual routing particles that flow along the routed edges.
+- 🔍 **Hover to trace, click to pin:** Hovering a node lights its connections and shows a tooltip with its description and tags.
+- 📖 **Story Mode:** Step-by-step walkthrough that zooms to the highlighted nodes, with Prev / Play / Next and arrow-key control.
   <br/><img src="https://raw.githubusercontent.com/Kimanzi-Collins/vizcraft/main/assets/story.gif" width="600" style="border-radius: 8px; margin-top: 10px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);"/>
-- 🎨 **10 Built-In Themes:** From `dark_neon` to `cyberpunk`, `dracula`, `nord`, and `minimal_light` - switchable dynamically at runtime.
+- 🎨 **20 Built-In Themes:** `dark_neon`, `tokyo_night`, `catppuccin_mocha`, `github_dark`, `rose_pine`, `everforest`, `dracula`, `synthwave`, `nord`, `gruvbox`, `solarized_dark`/`solarized_light`, `monokai`, `rdr2_gritty`, `blueprint`, `terminal`, `paper`, `high_contrast`, `minimal_light`, `cyberpunk`. Switch live in the sidebar. Plus three node styles (`card`, `tinted`, `outline`).
+- ✅ **Built-in validation:** `generate.py` flags dangling edges, duplicate ids, overlapping boxes and unknown themes before you open the file.
 - 💾 **State Persistence:** Checkable tasks for project trackers are saved directly to your browser's `localStorage`.
-- 🧠 **Native SVG Logos:** Fully supports injecting official product SVG logos (via simpleicons) directly into architecture nodes.
-- 📦 **100% Self-Contained HTML:** No server, no npm, no build step.
+- 🧠 **Logos & 16 node kinds:** Inject product logos via simpleicons (auto-inverted on light themes, falls back to a kind icon if a URL is dead), or use built-in icons for `queue`, `gateway`, `cache`, `function`, `user`, `security`...
+- 📦 **Single-file HTML:** No server, no npm, no build step. Fonts and GSAP load from CDNs; offline, pages still work with system fonts and without entry animations.
 
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.gif" width="100%">
 
@@ -96,20 +100,34 @@ python generate.py <input.json> <output.html>
 npx vizcraft <input.json> <output.html>
 ```
 
+| Flag | What it does |
+|---|---|
+| `--check` | Validate only; don't write HTML |
+| `--strict` | Exit non-zero (and write nothing) if validation finds warnings |
+| `--open`, `-o` | Open the result in your browser |
+| `--template`, `-t` | Force `architecture` or `progress` |
+| `--list-themes` | Print every theme id |
+| `--quiet`, `-q` | Only print errors |
+
+Tip: append `?theme=nord` to the HTML's URL to preview any theme without editing the JSON.
+
 <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.gif" width="100%">
 
 ## 🏗️ Architecture JSON Schema
 
-See `schemas/architecture.schema.json` for the full schema.
+See [`schemas/architecture.schema.json`](schemas/architecture.schema.json) for the full schema and [SKILL.md](SKILL.md) for guidance.
 
 <details>
 <summary><b>Click to expand Architecture Schema details</b></summary>
 <br/>
 
-- **Node kinds:** `entry`, `agent`, `service`, `store`, `external`, `model`, `cron`, `tool`
-- **Node Logos:** Specify an SVG URL using the `logo` key to render exact product logos on your nodes.
-- **Edge ports:** `top`, `bottom`, `left`, `right` *(auto-detected if omitted)*
-- **Story steps:** Create step-by-step interactive walkthroughs by defining an array of steps highlighting specific nodes.
+- **Node kinds:** `entry`, `agent`, `service`, `store`, `external`, `model`, `cron`, `tool`, `queue`, `gateway`, `client`, `cache`, `function`, `user`, `monitor`, `security` (plus aliases like `database`, `lambda`, `llm`)
+- **Node shapes:** `rect`, `pill`, `diamond`, `hexagon`, `cylinder`
+- **Node extras:** `logo`, `description` and `tags` (hover tooltip)
+- **Edges:** `label`, `style` (`solid`/`dashed`/`dotted`), `bidirectional`, `color`; ports (`top`/`bottom`/`left`/`right`) are optional hints, auto-picked if omitted
+- **Layout:** omit `x`/`y` for auto-layout; `project.direction` is `LR` or `TB`
+- **Project options:** `theme`, `edgeStyle`, `nodeStyle`, `direction`
+- **Story steps:** `highlight` accepts node ids or group ids
 
 </details>
 
@@ -117,7 +135,7 @@ See `schemas/architecture.schema.json` for the full schema.
 
 ## 📅 Progress JSON Schema
 
-See `schemas/progress.schema.json` for the full schema.
+See [`schemas/progress.schema.json`](schemas/progress.schema.json) for the full schema.
 
 <details>
 <summary><b>Click to expand Progress Schema details</b></summary>
@@ -125,7 +143,9 @@ See `schemas/progress.schema.json` for the full schema.
 
 - **Phases:** Group your work into logical sprints or modules.
 - **AI Tips:** Inject context-aware advice into the sidebar for each phase.
-- **Deep Notes:** Write multi-paragraph markdown notes for individual tasks, viewable in the sliding sidebar.
+- **Deep Notes:** Notes support `**bold**`, `*italic*`, `` `code` `` and bullet lists, viewable in the sliding sidebar.
+- **Task metadata:** optional `done`, `priority`, `owner`, `due` and `tags` render as chips. Task ids must be unique (they are the saved-progress keys).
+- **Quality of life:** *Next up* shortcut, *Hide completed*, *Reset progress*.
 
 </details>
 
@@ -145,8 +165,11 @@ Once added, the agent automatically ingests [SKILL.md](SKILL.md) to understand t
 
 ## 🌟 Featured Demos
 
-We have included a detailed real-world visualization in the `demos/` directory:
-- **`demos/uber_architecture.html` / `demos/uber_architecture.json`**: A comprehensive interactive map of the Uber backend microservice architecture (featuring real logos for tools like Node, Go, HAProxy, Kafka, and Cassandra).
+Open any of these from the `demos/` directory:
+- **`uber_architecture`**: Uber's backend microservice map with hand-placed coordinates, real logos and a 5-step story.
+- **`saas_platform`**: A grouped SaaS stack with **no coordinates**: auto-layout, new node kinds, curved edges, tinted nodes, Catppuccin theme.
+- **`auth_flowchart`**: A login/MFA **flowchart** using diamonds, pills, a hexagon and a cylinder, top-to-bottom, Tokyo Night theme.
+- **`demo_progress`** / **`uber_progress`**: Phased progress trackers.
 
 ---
 
